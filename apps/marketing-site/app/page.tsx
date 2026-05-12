@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import ProfilePreview from "@/components/marketing/ProfilePreview";
+import EntityFinder from "@/components/marketing/EntityFinder";
 import CategoryGrid from "@/components/marketing/CategoryGrid";
+import Manifesto from "@/components/marketing/Manifesto";
 
 export default function HomePage() {
   return (
@@ -12,18 +13,19 @@ export default function HomePage() {
 
         <div className="relative mx-auto max-w-7xl px-6 pt-16 pb-20 md:pt-24">
           <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-7">
+            <div className="lg:col-span-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
                 For registered federal contractors
               </p>
               <h1 className="font-display mt-5 text-5xl leading-[1.02] text-navy-900 text-balance md:text-[64px]">
                 Your entity.<br />
-                <span className="text-navy-700">One dashboard.</span>
+                <span className="text-navy-700">Your awards.</span><br />
+                One dashboard.
               </h1>
               <p className="mt-7 max-w-xl text-lg leading-relaxed text-slate-700">
-                Live SAM.gov profile, your awards history, and quotes on
-                surety bonds, working capital, vendor programs, equipment,
-                and compliance — pegged to your UEI.
+                Live SAM.gov profile, every federal contract action since
+                FY08, and quotes on surety, capital, vendor programs,
+                equipment, and compliance — pegged to your UEI.
               </p>
 
               <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -38,18 +40,18 @@ export default function HomePage() {
                   href="#whats-inside"
                   className="group inline-flex items-center justify-center gap-2 border border-line-strong bg-white px-7 py-4 text-[15px] font-semibold text-slate-800 transition-colors hover:border-copper-500 hover:text-copper-700"
                 >
-                  See What's Inside
+                  See What&apos;s Inside
                   <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </Link>
               </div>
 
               <p className="mt-8 text-xs text-slate-500">
-                30 seconds. UEI and email.
+                30 seconds. UEI and email. Or try the live lookup →
               </p>
             </div>
 
-            <div className="lg:col-span-5">
-              <ProfilePreview />
+            <div className="lg:col-span-6">
+              <EntityFinder />
             </div>
           </div>
         </div>
@@ -132,6 +134,9 @@ export default function HomePage() {
           </ol>
         </div>
       </section>
+
+      {/* MANIFESTO */}
+      <Manifesto />
 
       {/* CLAIM CTA */}
       <section>
