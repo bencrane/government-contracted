@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 #
 # Standalone Next.js + Doppler container for governmentcontracted.com platform app.
-# Build context = repo root.
+# Build context = repo root (pnpm workspace lives there).
 
 # ---- deps ----
 FROM node:20-slim AS deps
@@ -9,8 +9,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
     && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/platform-app/package.json ./apps/platform-app/
+RUN pnpm install --frozen-lockfile --filter platform-app
 
 # ---- build ----
 FROM node:20-slim AS builder
@@ -27,10 +28,12 @@ RUN curl -sLf --retry 3 --tlsv1.2 --proto "=https" \
 RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/platform-app/node_modules ./apps/platform-app/node_modules
 COPY . .
 
 ARG DOPPLER_TOKEN
 ENV DOPPLER_TOKEN=$DOPPLER_TOKEN
+WORKDIR /app/apps/platform-app
 RUN doppler run -- pnpm build
 
 # ---- runner ----
@@ -51,10 +54,12 @@ ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
-COPY docker-entrypoint.sh ./docker-entrypoint.sh
+# Next.js standalone bundles the server + a slim node_modules into .next/standalone/,
+# matching the source tree's apps/platform-app/ path inside the workspace.
+COPY --from=builder /app/apps/platform-app/.next/standalone ./
+COPY --from=builder /app/apps/platform-app/.next/static ./apps/platform-app/.next/static
+COPY --from=builder /app/apps/platform-app/public ./apps/platform-app/public
+COPY apps/platform-app/docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
 
 RUN useradd --create-home --shell /bin/sh appuser \
