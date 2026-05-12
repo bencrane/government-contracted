@@ -1,0 +1,16 @@
+{
+  "name": "government-contracted",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev:marketing": "pnpm --filter marketing-site dev",
+    "dev:platform": "pnpm --filter platform-app dev",
+    "build:marketing": "pnpm --filter marketing-site build",
+    "build:platform": "pnpm --filter platform-app build",
+    "lint": "pnpm -r lint"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.12.0"
+}
