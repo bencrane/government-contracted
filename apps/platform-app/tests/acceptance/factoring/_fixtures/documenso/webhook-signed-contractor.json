@@ -1,0 +1,7 @@
+{
+  "event": "document.signed",
+  "envelope_id": "fixture_e1",
+  "recipient_email": "contractor@example.com",
+  "recipient_role": "contractor_assignor",
+  "signed_at": "2026-05-13T01:00:00Z"
+}
