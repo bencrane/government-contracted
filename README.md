@@ -14,7 +14,7 @@ Two services in this repo:
 - Zod for form validation
 - Navy / off-white / restrained copper theme · Fraunces serif display + Inter body + JetBrains Mono labels
 - Supabase SSR auth (platform-app only)
-- Postgres (`govcon.*` schema in the same Supabase project as `lth.*` and `hq_x.*`)
+- Postgres (dedicated Supabase project — single `public` schema)
 
 ## Surfaces
 
@@ -45,9 +45,10 @@ Doppler project: `hq-government-contracted`, config `prd`.
 |---|---|
 | `APPLICATIONS_WEBHOOK_URL` | POST endpoint for marketing-site form submissions (claim, contact). Falls back to stdout logging if unset. |
 | `EMAIL_INTENT_WEBHOOK_URL` | POST endpoint for stub dashboard-recap emails. Falls back to stdout logging. |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL (platform-app). |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key (platform-app). |
-| `HQX_DB_URL_POOLED` | Postgres pooled connection (platform-app server-side reads/writes). |
+| `NEXT_PUBLIC_GC_SUPABASE_URL` | Supabase project URL (platform-app). |
+| `NEXT_PUBLIC_GC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable (anon) key (platform-app). |
+| `GC_DB_URL_POOLED` | Postgres pooled connection (platform-app server-side reads/writes). |
+| `APP_ENV` | `dev` / `stg` / `prd`. |
 
 ## Deploy
 
@@ -55,12 +56,12 @@ Railway project `government-contracted` with two services, each a Dockerfile-bas
 
 ## Data sources
 
-Dashboard data is currently mocked (`apps/platform-app/lib/mock-*.ts`). The real read layer — derived parquet on R2 read via DuckDB — is being established in the FMCSA platform first. Once that pattern is proven end-to-end, the mocks here swap one-for-one for real reads against `govcon.entity_grain_slim`, `govcon.active_awards`, `govcon.sam_usaspending_bridge`, etc.
+Dashboard data is currently mocked (`apps/platform-app/lib/mock-*.ts`). The real read layer — derived parquet on R2 read via DuckDB — is being established in the FMCSA platform first. Once that pattern is proven end-to-end, the mocks here swap one-for-one for real reads against `entity_grain_slim`, `active_awards`, `sam_usaspending_bridge`, etc.
 
 ## Schema
 
-`govcon.*` schema lives alongside `lth.*` and `hq_x.*` in the same Supabase project. Apply with:
+Single `public` schema in a dedicated Supabase Postgres for this app. Apply with:
 
 ```bash
-doppler run -- psql "$HQX_DB_URL_POOLED" -f apps/platform-app/migrations/001_create_govcon_schema.sql
+doppler run -- psql "$GC_DB_URL_POOLED" -f apps/platform-app/migrations/001_initial.sql
 ```

@@ -8,8 +8,8 @@ export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
-    env.NEXT_PUBLIC_HQX_SUPABASE_URL,
-    env.NEXT_PUBLIC_HQX_SUPABASE_PUBLISHABLE_KEY,
+    env.NEXT_PUBLIC_GC_SUPABASE_URL,
+    env.NEXT_PUBLIC_GC_SUPABASE_PUBLISHABLE_KEY,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),

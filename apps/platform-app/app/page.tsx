@@ -15,9 +15,9 @@ export default async function RootPage() {
   const { rows } = await pool().query<{ slug: string | null; category: string; uei: string | null }>(
     `
     SELECT o.slug, o.category, o.uei
-      FROM govcon.users u
-      JOIN govcon.organization_memberships m ON m.user_id = u.id AND m.status = 'active'
-      JOIN govcon.organizations o ON o.id = m.organization_id
+      FROM users u
+      JOIN organization_memberships m ON m.user_id = u.id AND m.status = 'active'
+      JOIN organizations o ON o.id = m.organization_id
      WHERE u.auth_user_id = $1
      ORDER BY m.created_at ASC
      LIMIT 1

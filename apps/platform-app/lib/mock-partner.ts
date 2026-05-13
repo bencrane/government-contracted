@@ -1,7 +1,7 @@
 // Minimal mock partner data — enough to render the partner shell and pages.
 //
-// Real reads will pull from govcon.organizations (partner orgs) +
-// govcon.transfers (CRM pipeline) once the platform is wired to real data.
+// Real reads will pull from organizations (partner orgs) +
+// transfers (CRM pipeline) once the platform is wired to real data.
 
 export type PartnerOrg = {
   slug: string;
