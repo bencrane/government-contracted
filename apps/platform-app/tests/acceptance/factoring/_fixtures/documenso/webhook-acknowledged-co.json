@@ -1,0 +1,7 @@
+{
+  "event": "envelope.acknowledged",
+  "envelope_id": "fixture_e1",
+  "recipient_email": "co@example.com",
+  "recipient_role": "contracting_officer",
+  "acknowledged_at": "2026-05-13T02:00:00Z"
+}
