@@ -16,9 +16,13 @@ import { env } from '@/lib/env';
  * Cookies are written directly onto the redirect response (the canonical @supabase/ssr
  * route-handler pattern) so the cleared session is guaranteed to reach the browser.
  */
-export async function POST(request: Request) {
+export async function POST() {
   const cookieStore = await cookies();
-  const res = NextResponse.redirect(new URL('/login', request.url), { status: 303 });
+  // Relative Location ('/login'), NOT new URL('/login', request.url): behind
+  // Railway's proxy request.url is the internal bind address (https://0.0.0.0:3000),
+  // so an absolute redirect sends the browser to a dead host. A relative Location
+  // is resolved by the browser against the real public origin.
+  const res = new NextResponse(null, { status: 303, headers: { Location: '/login' } });
 
   const supabase = createServerClient(
     env.NEXT_PUBLIC_GC_SUPABASE_URL,
