@@ -1,17 +1,14 @@
-import SectionPlaceholder from "@/components/dashboard/SectionPlaceholder";
+import { resolveTenantUei } from "@/lib/tenant";
+import { getSamProfile } from "@/lib/catalyst/client";
+import SamProfileSurface from "@/components/dashboard/SamProfileSurface";
 
 type Props = { params: Promise<{ uei: string }> };
 
 export const metadata = { title: "SAM.gov profile — Government Contracted" };
 
 export default async function ProfilePage({ params }: Props) {
-  const { uei } = await params;
-  return (
-    <SectionPlaceholder
-      eyebrow="SAM.gov profile"
-      title="Your live entity record."
-      description="Registration status, expiration, NAICS, set-aside eligibility, addresses, POCs, and CAGE — pulled fresh from SAM.gov daily. Full surface lands in the next iteration."
-      backHref={`/dashboard/${uei}`}
-    />
-  );
+  const { uei: raw } = await params;
+  const uei = await resolveTenantUei(raw); // auth + membership-set check; 404 on mismatch
+  const profile = await getSamProfile(uei);
+  return <SamProfileSurface uei={uei} profile={profile} />;
 }

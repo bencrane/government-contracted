@@ -1,17 +1,14 @@
-import SectionPlaceholder from "@/components/dashboard/SectionPlaceholder";
+import { resolveTenantUei } from "@/lib/tenant";
+import { getPastPerformance } from "@/lib/catalyst/client";
+import PastPerformanceSurface from "@/components/dashboard/PastPerformanceSurface";
 
 type Props = { params: Promise<{ uei: string }> };
 
 export const metadata = { title: "Past performance — Government Contracted" };
 
 export default async function PastPerformancePage({ params }: Props) {
-  const { uei } = await params;
-  return (
-    <SectionPlaceholder
-      eyebrow="Past performance"
-      title="CPARS ratings, exclusions, and recompete radar."
-      description="CPARS ratings by contract, exclusions monitoring on you and your sub chain, and recompete windows on contracts ending in the next 6, 12, and 18 months."
-      backHref={`/dashboard/${uei}`}
-    />
-  );
+  const { uei: raw } = await params;
+  const uei = await resolveTenantUei(raw); // auth + membership-set check; 404 on mismatch
+  const data = await getPastPerformance(uei);
+  return <PastPerformanceSurface uei={uei} data={data} />;
 }
