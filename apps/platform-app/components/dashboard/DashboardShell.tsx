@@ -74,11 +74,11 @@ export default function DashboardShell({
       <div className="flex min-h-screen">
         <div
           aria-hidden={collapsed}
-          className={`hidden shrink-0 overflow-hidden transition-[width] duration-200 ease-in-out md:block ${
+          className={`sticky top-0 hidden h-screen shrink-0 self-start overflow-hidden transition-[width] duration-200 ease-in-out md:block ${
             collapsed ? "w-0" : "w-64"
           }`}
         >
-          <div className="w-64">{sidebar}</div>
+          <div className="h-full w-64">{sidebar}</div>
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col">
