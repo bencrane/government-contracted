@@ -61,3 +61,28 @@ export async function getSessionOrgUeis(): Promise<Set<string>> {
       .filter((u): u is string => Boolean(u)),
   );
 }
+
+/**
+ * Whether the authenticated user holds an active platform-admin grant.
+ *
+ * Platform admin is a GLOBAL privileged role (see migrations/003_platform_admins.sql)
+ * for cross-tenant mutations that have no owning tenant org to authorize against —
+ * distinct from per-org membership. Resolved fresh per request, exactly like
+ * getSessionOrgs: a revoked grant takes effect immediately (no JWT packing).
+ */
+export async function isSessionPlatformAdmin(): Promise<boolean> {
+  const authUserId = await getSessionUserId();
+  if (!authUserId) return false;
+  const { rows } = await pool().query(
+    `
+    SELECT 1
+      FROM users u
+      JOIN platform_admins pa
+        ON pa.user_id = u.id AND pa.revoked_at IS NULL
+     WHERE u.auth_user_id = $1
+     LIMIT 1
+    `,
+    [authUserId],
+  );
+  return rows.length > 0;
+}
