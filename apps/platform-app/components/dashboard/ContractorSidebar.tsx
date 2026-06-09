@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Wordmark from "@/components/site/Wordmark";
 import { useSidebar } from "./DashboardShell";
+import { signOut } from "@/app/auth/actions";
 
 type NavItem = {
   label: string;
@@ -141,13 +142,15 @@ export default function ContractorSidebar({ uei, contractorName }: Props) {
           </span>
           <ChevronDown className="h-3.5 w-3.5 flex-none text-slate-400" />
         </button>
-        <button
-          type="button"
-          className="mt-2 flex w-full items-center gap-2 rounded-sm px-3 py-1.5 text-xs text-slate-500 transition-colors hover:text-slate-800"
-        >
-          <LogOut className="h-3.5 w-3.5" />
-          Sign out
-        </button>
+        <form action={signOut} className="mt-2">
+          <button
+            type="submit"
+            className="flex w-full items-center gap-2 rounded-sm px-3 py-1.5 text-xs text-slate-500 transition-colors hover:text-slate-800"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Sign out
+          </button>
+        </form>
       </div>
     </aside>
   );
