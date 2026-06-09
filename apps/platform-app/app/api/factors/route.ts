@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Client } from "pg";
 import { z } from "zod";
+import { requirePlatformAdmin, TenantError } from "@/lib/tenant";
 
 const schema = z.object({
   name: z.string().min(1),
@@ -19,6 +20,21 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
+  // Platform-admin gate. Factor onboarding provisions a NEW capital_provider org +
+  // lockbox banking config (bank name / account / routing), so there is no owning
+  // tenant to check membership against — only an authenticated platform administrator
+  // may call it. Asserted before any request-controlled work: unlike /api/assignments
+  // the check has no body dependency, so the privileged endpoint fails fast (this is
+  // what closed the anonymous privileged-creation hole). TenantError -> 401/403.
+  try {
+    await requirePlatformAdmin();
+  } catch (e) {
+    if (e instanceof TenantError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
+    throw e;
+  }
+
   let body: unknown;
   try {
     body = await req.json();

@@ -6,8 +6,25 @@
  * Test invokes the Next.js route handler directly via dynamic import. Reads/
  * writes the live `public.*` schema; isolation via transactional rollback.
  */
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from "vitest";
 import { Client } from "pg";
+
+// Factor onboarding is now gated by requirePlatformAdmin (lib/tenant.ts) — it
+// provisions a capital_provider org + lockbox banking config with no owning tenant
+// to check membership against, so the route demands an authenticated session AND an
+// active platform-admin grant, resolved through @/lib/session. The session is stood
+// in here; `session` is mutable so the negative paths (anonymous, non-admin) can be
+// exercised against the same route.
+const session = vi.hoisted(() => ({
+  userId: "b1-admin-auth-user" as string | null,
+  isAdmin: true,
+}));
+vi.mock("@/lib/session", () => ({
+  getSessionUserId: async () => session.userId,
+  isSessionPlatformAdmin: async () => session.userId !== null && session.isAdmin,
+  getSessionOrgs: async () => [],
+  getSessionOrgUeis: async () => new Set<string>(),
+}));
 
 const DATABASE_URL = process.env.GC_DB_URL_POOLED;
 let client: Client;
@@ -33,6 +50,9 @@ describe("B1: factor onboarding", () => {
   });
 
   beforeEach(async () => {
+    // Default to an authorized platform admin; negative-path tests override locally.
+    session.userId = "b1-admin-auth-user";
+    session.isAdmin = true;
     await client.query("BEGIN");
   });
 
@@ -94,5 +114,47 @@ describe("B1: factor onboarding", () => {
       [payload.slug]
     );
     expect(orgs.rows[0].n).toBe(1);
+  });
+
+  it("rejects an anonymous caller with 401 and creates nothing", async () => {
+    session.userId = null;
+    session.isAdmin = false;
+    const { POST } = await import("@/app/api/factors/route");
+    const payload = validPayload();
+    const res = await POST(
+      new Request("http://localhost/api/factors", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+    );
+    expect(res.status).toBe(401);
+
+    const orgs = await client.query(
+      "SELECT count(*)::int as n FROM organizations WHERE slug = $1",
+      [payload.slug]
+    );
+    expect(orgs.rows[0].n).toBe(0);
+  });
+
+  it("rejects an authenticated non-admin with 403 and creates nothing", async () => {
+    session.userId = "b1-non-admin-user";
+    session.isAdmin = false;
+    const { POST } = await import("@/app/api/factors/route");
+    const payload = validPayload();
+    const res = await POST(
+      new Request("http://localhost/api/factors", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+    );
+    expect(res.status).toBe(403);
+
+    const orgs = await client.query(
+      "SELECT count(*)::int as n FROM organizations WHERE slug = $1",
+      [payload.slug]
+    );
+    expect(orgs.rows[0].n).toBe(0);
   });
 });

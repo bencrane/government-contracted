@@ -2,8 +2,24 @@
  * F3 — public.audit_log captures factor onboarding, assignment create,
  * disbursement create, and Stripe-fire events with appropriate action codes.
  */
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { Client } from "pg";
+
+// This integration test drives all three tenant-gated routes:
+//   * factors      — requirePlatformAdmin (platform-admin grant)
+//   * assignments  — requireSessionOrg by factor slug
+//   * disbursements— requireSessionOrg by owning factor_org_id
+// Stand in a platform admin; the owning factor org (id + slug) is created mid-test
+// by the factors route, so it is injected into the session at runtime.
+const session = vi.hoisted(() => ({
+  orgs: [] as Array<{ orgId: string; slug: string | null; category: string; uei: string | null }>,
+}));
+vi.mock("@/lib/session", () => ({
+  getSessionUserId: async () => "f3-admin-auth-user",
+  isSessionPlatformAdmin: async () => true,
+  getSessionOrgs: async () => session.orgs,
+  getSessionOrgUeis: async () => new Set<string>(),
+}));
 
 const DATABASE_URL = process.env.GC_DB_URL_POOLED;
 let client: Client;
@@ -63,6 +79,13 @@ describe("F3: audit log integration", () => {
       })
     );
     expect(factorRes.status).toBe(201);
+    const factorBody = (await factorRes.json()) as { slug: string; organization_id: string };
+
+    // Authorize the session as the just-created factor org for the downstream
+    // assignment (slug match) and disbursement (owning factor_org_id match) routes.
+    session.orgs = [
+      { orgId: factorBody.organization_id, slug, category: "capital_provider", uei: null },
+    ];
 
     const onboardLog = await client.query(
       "SELECT * FROM audit_log WHERE action='factor.onboarded' ORDER BY created_at DESC LIMIT 1"

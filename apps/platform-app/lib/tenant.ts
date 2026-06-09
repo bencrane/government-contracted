@@ -1,6 +1,6 @@
 import 'server-only';
 import { redirect, notFound } from 'next/navigation';
-import { getSessionUserId, getSessionOrgUeis, getSessionOrgs } from '@/lib/session';
+import { getSessionUserId, getSessionOrgUeis, getSessionOrgs, isSessionPlatformAdmin } from '@/lib/session';
 
 /**
  * Tenant isolation for the UEI-keyed dashboard surfaces.
@@ -66,5 +66,23 @@ export async function requireSessionOrg(
 export async function requireSession(): Promise<string> {
   const userId = await getSessionUserId();
   if (!userId) throw new TenantError(401, 'authentication required');
+  return userId;
+}
+
+/**
+ * Platform-admin gate. For cross-tenant privileged mutations that have NO owning
+ * tenant org to authorize against — chiefly factor onboarding (POST /api/factors),
+ * which provisions a brand-new capital_provider org + lockbox banking config and so
+ * cannot be checked against organization_memberships.
+ *
+ * Two-stage: requireSession() first (401 for anonymous), then the platform-admin
+ * grant (403 for an authenticated non-admin) — so callers get the same 401/403
+ * TenantError ladder as requireSessionOrg. Returns the authenticated user id.
+ */
+export async function requirePlatformAdmin(): Promise<string> {
+  const userId = await requireSession();
+  if (!(await isSessionPlatformAdmin())) {
+    throw new TenantError(403, 'platform administrator authorization required');
+  }
   return userId;
 }
