@@ -6,6 +6,16 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { seedPerfectedAssignment, cleanupSeededAssignment } from "../_helpers/seed-perfected-assignment";
 
+// Authenticated session for tenant isolation: the disbursement route now requires
+// the caller to be a member of the factor org that owns the assignment. The seeded
+// factor_org_id is injected into the session mock at runtime (see beforeAll).
+const sessionState = vi.hoisted(() => ({ orgs: [] as Array<{ orgId: string; slug: string | null; category: string; uei: string | null }> }));
+vi.mock("@/lib/session", () => ({
+  getSessionUserId: async () => "b7-auth-user",
+  getSessionOrgs: async () => sessionState.orgs,
+  getSessionOrgUeis: async () => new Set<string>(),
+}));
+
 // Mock the meter module so we can spy on it
 vi.mock("@/lib/stripe/meter", () => ({
   buildMeterPayload: vi.fn((input: {
@@ -33,6 +43,10 @@ describe("B7: Stripe meter event on disbursement", () => {
     const result = await seedPerfectedAssignment(dummy);
     seededAssignmentId = result.assignment_id;
     seededFactorOrgId = result.factor_org_id;
+    // Authorize the session as the owning factor org for the isolation check.
+    sessionState.orgs = [
+      { orgId: result.factor_org_id, slug: null, category: "capital_provider", uei: null },
+    ];
   });
 
   afterAll(async () => {

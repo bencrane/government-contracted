@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import IdentityStrip from "@/components/dashboard/IdentityStrip";
@@ -7,6 +6,9 @@ import EventFeed from "@/components/dashboard/EventFeed";
 import NextDeadlines from "@/components/dashboard/NextDeadlines";
 import ActionShortcuts from "@/components/dashboard/ActionShortcuts";
 import { getMockDashboard } from "@/lib/mock-dashboard";
+import { resolveTenantUei } from "@/lib/tenant";
+import { getOverview, getSamProfile } from "@/lib/catalyst/client";
+import { hydrateContractor, hydrateSam } from "@/lib/dashboard-adapter";
 
 type Props = {
   params: Promise<{ uei: string }>;
@@ -22,27 +24,34 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function DashboardPage({ params }: Props) {
-  const { uei } = await params;
-  const cleanUei = uei.toUpperCase().replace(/[^A-HJ-NP-Z0-9]/g, "");
-  if (!cleanUei || cleanUei.length < 3) notFound();
+  const { uei: raw } = await params;
+  const cleanUei = await resolveTenantUei(raw); // auth + membership-set check; 404 on mismatch
 
-  const data = getMockDashboard(cleanUei);
-  const recentFeed = data.feed.slice(0, 4);
+  // Out-of-scope surfaces (surety, compliance, deadlines, feed) stay on the mock
+  // base until they get their own ingest. The directive's "Overview Aggregates" +
+  // entity identity + the SAM health tile are overlaid from real catalyst data.
+  const base = getMockDashboard(cleanUei);
+  const [overview, sam] = await Promise.all([getOverview(cleanUei), getSamProfile(cleanUei)]);
+
+  const contractor = hydrateContractor(base.contractor, cleanUei, overview, sam);
+  const samTile = hydrateSam(base.sam, sam);
+  const activeContractsCount = overview?.activeContractCount ?? base.activeContracts.count;
+  const recentFeed = base.feed.slice(0, 4);
 
   return (
     <>
-      <IdentityStrip contractor={data.contractor} />
+      <IdentityStrip contractor={contractor} />
       <HealthRow
-        sam={data.sam}
-        surety={data.surety}
-        worstCompliance={data.worstCompliance}
-        activeContractsCount={data.activeContracts.count}
+        sam={samTile}
+        surety={base.surety}
+        worstCompliance={base.worstCompliance}
+        activeContractsCount={activeContractsCount}
       />
 
       <section className="flex-1 bg-background">
         <div className="mx-auto max-w-[1400px] px-6 py-8 space-y-12">
           <NextDeadlines
-            deadlines={data.deadlines}
+            deadlines={base.deadlines}
             href={`/dashboard/${cleanUei}/compliance`}
           />
 

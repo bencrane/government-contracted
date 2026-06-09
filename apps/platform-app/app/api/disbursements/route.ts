@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Client } from "pg";
 import { z } from "zod";
 import { fireMeterEvent, buildMeterPayload } from "@/lib/stripe/meter";
+import { requireSessionOrg, TenantError } from "@/lib/tenant";
 
 const schema = z.object({
   assignment_id: z.string().uuid(),
@@ -55,6 +56,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const assignment = aRow.rows[0];
+
+    // Tenant isolation: only the factor org that OWNS this assignment may record a
+    // disbursement against it. Without this, any caller could post a payment (and
+    // fire a Stripe meter event) against another factor's assignment.
+    try {
+      await requireSessionOrg((o) => o.orgId === assignment.factor_org_id);
+    } catch (e) {
+      if (e instanceof TenantError) {
+        return NextResponse.json({ error: e.message }, { status: e.status });
+      }
+      throw e;
+    }
 
     if (assignment.status !== "perfected") {
       return NextResponse.json(

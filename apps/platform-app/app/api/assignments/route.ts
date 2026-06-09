@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Client } from "pg";
 import { z } from "zod";
+import { requireSessionOrg, TenantError } from "@/lib/tenant";
 
 const schema = z.object({
   factor_slug: z.string().min(1),
@@ -42,6 +43,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   const data = parsed.data;
+
+  // Tenant isolation: the caller must be an active member of the capital_provider
+  // org named by factor_slug. Without this, any caller could forge an assignment
+  // binding ANY factor to ANY contractor (the lateral-exposure flaw).
+  try {
+    await requireSessionOrg(
+      (o) => o.category === "capital_provider" && o.slug === data.factor_slug,
+    );
+  } catch (e) {
+    if (e instanceof TenantError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
+    throw e;
+  }
+
   const client = new Client({
     connectionString: process.env.GC_DB_URL_POOLED,
   });
@@ -49,7 +65,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     await client.connect();
 
-    // Resolve factor org
+    // Resolve factor org (real org id for the FK; membership already asserted above)
     const factorRow = await client.query<{ id: string }>(
       "SELECT id FROM organizations WHERE slug = $1 AND category = 'capital_provider'",
       [data.factor_slug]

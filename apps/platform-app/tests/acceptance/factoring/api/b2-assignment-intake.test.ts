@@ -2,8 +2,19 @@
  * B2 — POST /api/assignments creates a row in `drafted` state. See directive
  * constraint B2 for payload shape.
  */
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { Client } from "pg";
+
+// Authenticated session: a member of the capital_provider org "test-factor-b2".
+// The route now enforces tenant isolation (caller must own the factor org), so
+// the test stands in a session rather than posting anonymously.
+vi.mock("@/lib/session", () => ({
+  getSessionUserId: async () => "b2-auth-user",
+  getSessionOrgs: async () => [
+    { orgId: "00000000-0000-0000-0000-0000000000b2", slug: "test-factor-b2", category: "capital_provider", uei: null },
+  ],
+  getSessionOrgUeis: async () => new Set<string>(),
+}));
 
 const DATABASE_URL = process.env.GC_DB_URL_POOLED;
 let client: Client;
