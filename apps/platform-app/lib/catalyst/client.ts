@@ -23,6 +23,12 @@ import type {
  */
 const UEI_RE = /^[A-Za-z0-9]{12}$/;
 
+// Per-call ceiling so a slow / unreachable gateway degrades the surface to its empty-state
+// instead of awaiting unbounded and hanging the server-component render (a hung fetch with no
+// AbortSignal previously blocked the RSC for the full upstream duration). The catalyst reads
+// are gold point-lookups (sub-second); 10s is generous headroom over a cold gateway start.
+const REQUEST_TIMEOUT_MS = 10_000;
+
 function configured(): boolean {
   return Boolean(env.CATALYST_API_URL && env.CATALYST_API_TOKEN);
 }
@@ -34,11 +40,22 @@ async function getJson<T>(uei: string, surface: string): Promise<T | null> {
     return null;
   }
   const url = `${env.CATALYST_API_URL}/api/v1/entities/${uei}/${surface}`;
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${env.CATALYST_API_TOKEN}` },
-    // The gateway opens Lance per-request (latest committed version); never cache.
-    cache: 'no-store',
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      headers: { Authorization: `Bearer ${env.CATALYST_API_TOKEN}` },
+      // The gateway opens Lance per-request (latest committed version); never cache.
+      cache: 'no-store',
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+  } catch (err) {
+    // Timeout or network failure: degrade to empty-state rather than hang/crash the render.
+    // A persistent failure is visible in the server log (not silently swallowed forever).
+    console.warn(
+      `catalyst-client: ${surface} for ${uei} unreachable (${err instanceof Error ? err.name : 'error'}); rendering empty-state`,
+    );
+    return null;
+  }
   if (res.status === 404) return null; // unknown entity / no footprint — a valid empty outcome
   if (!res.ok) {
     throw new Error(`catalyst-client: ${surface} for ${uei} failed (${res.status})`);
