@@ -1,0 +1,5 @@
+# Keeps apps/platform-app/public/ in the repo. The platform-app Dockerfile
+# (runner stage) does `COPY --from=builder .../public ./.../public`, so this
+# directory must exist in every build context — otherwise the image build fails
+# with "/app/apps/platform-app/public: not found". Next.js serves this dir's
+# contents as static assets at the web root; it is intentionally empty for now.
