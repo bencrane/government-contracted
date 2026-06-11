@@ -1,0 +1,3 @@
+setup:
+  project: hq-government-contracted
+  config: prd
