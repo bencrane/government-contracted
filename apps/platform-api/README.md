@@ -61,16 +61,15 @@ fallback names let the BFF boot against the existing config with no new keys.
 
 When `APP_ENV=prd`, `env.ts` **refuses to boot** unless:
 
-- `COREX_API_URL` is the **private** core-x address — a public `*.up.railway.app` host is
-  rejected (booting against it would carry `COREX_SERVICE_TOKEN` over the public internet,
-  which is the exact exposure this BFF removes). Set
-  `COREX_API_URL=http://catalyst-api.railway.internal:8080`.
+- `COREX_API_URL` never sends the service token over the clear: a **public** core-x host must
+  be **https** (TLS), or a **private** `*.railway.internal` host may use http. Set
+  `COREX_API_URL=https://api.catalystdev.run` (the core-x service address over TLS).
 - `ALLOWED_ORIGINS` is set to the real SPA origin(s) — the localhost dev default is rejected.
   Set `ALLOWED_ORIGINS=https://app.governmentcontracted.com`.
 
-Set both in `hq-government-contracted/prd` (canonical `COREX_API_URL` takes precedence over the
-public `CATALYST_API_URL` fallback) before the Railway service is deployed. Outside prd, the
-localhost CORS default applies and the host guard is inert.
+Both are already set in `hq-government-contracted/prd` (canonical `COREX_API_URL` takes
+precedence over the `CATALYST_API_URL` fallback). Outside prd, the localhost CORS default
+applies and the scheme guard is inert.
 
 ## Deployment
 
