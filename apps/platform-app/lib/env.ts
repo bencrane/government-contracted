@@ -11,12 +11,16 @@ const schema = z
     // required in stg/prd — see the fail-closed refine below.
     CATALYST_API_URL: z.string().url().optional(),
     CATALYST_API_TOKEN: z.string().min(1).optional(),
+    // HS256 key for the sign-in-scoped tenant cookie (lib/auth/tenant-cookie.ts). Optional
+    // in dev (the read path falls back to the live membership query when unset); required
+    // in stg/prd by the refine below so the dashboard's cached-read fast path is signed.
+    TENANT_COOKIE_SECRET: z.string().min(32).optional(),
   })
   .superRefine((val, ctx) => {
     // Fail-closed: outside dev the BFF must hold both the private URL and the bearer
     // token, so it can never resolve a live tenant against an unauthenticated gateway.
     if (val.APP_ENV !== 'dev') {
-      for (const key of ['CATALYST_API_URL', 'CATALYST_API_TOKEN'] as const) {
+      for (const key of ['CATALYST_API_URL', 'CATALYST_API_TOKEN', 'TENANT_COOKIE_SECRET'] as const) {
         if (!val[key]) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -36,6 +40,7 @@ const parsed = schema.safeParse({
   APP_ENV: process.env.APP_ENV,
   CATALYST_API_URL: process.env.CATALYST_API_URL,
   CATALYST_API_TOKEN: process.env.CATALYST_API_TOKEN,
+  TENANT_COOKIE_SECRET: process.env.TENANT_COOKIE_SECRET,
 });
 
 if (!parsed.success) {

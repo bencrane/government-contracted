@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
+import { establishTenantSession, clearTenantSession } from '@/lib/auth/tenant-session';
 
 export type AuthState = { error: string | null; info: string | null };
 
@@ -49,11 +50,17 @@ export async function signIn(
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { ...initial, error: error.message };
 
+  // Resolve the tenant once, now, into the signed cookie so dashboard renders skip the
+  // per-request membership query. Best-effort: a failure here just means the read path
+  // falls back to the live query.
+  await establishTenantSession();
+
   redirect('/');
 }
 
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  await clearTenantSession();
   redirect('/login');
 }
