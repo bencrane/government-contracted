@@ -1,13 +1,23 @@
 import 'server-only';
+import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { pool } from '@/lib/audience-specs/db';
+import { env } from '@/lib/env';
+import { verifyAccessToken } from '@/lib/auth/jwt';
+import { TENANT_COOKIE_NAME, readTenantToken } from '@/lib/auth/tenant-cookie';
 
 /**
  * Auth → tenant binding. The single place the platform resolves the authenticated
  * Supabase user to the set of organizations they actively belong to.
  *
- * Per the isolation ruling we do NOT pack memberships into the Supabase JWT — every
- * call is a fresh DB round-trip so a revoked membership takes effect immediately.
+ * Identity is verified LOCALLY (ES256/JWKS, see lib/auth/jwt.ts) off the session cookie —
+ * no per-render network round-trip to the Supabase Auth server.
+ *
+ * Org membership is the live DB query (`querySessionOrgs`), which privileged MUTATIONS
+ * (requireSessionOrg / requirePlatformAdmin) call so a revoked membership blocks writes
+ * immediately. The read-hot dashboard surface (`getSessionOrgUeis`) instead reads a
+ * sign-in-scoped, user-bound signed cookie and only falls back to the live query on a miss
+ * — the deliberate "resolve on sign-in" posture for read display (lib/auth/tenant-cookie.ts).
  * Callers MUST derive any tenant UEI from this, never from a client-supplied param.
  */
 export interface SessionOrg {
@@ -17,18 +27,28 @@ export interface SessionOrg {
   uei: string | null;
 }
 
-export async function getSessionUserId(): Promise<string | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user?.id ?? null;
+/** HS256 signing key for the tenant cookie, or null when unconfigured (dev fallback). */
+export function tenantSecret(): Uint8Array | null {
+  return env.TENANT_COOKIE_SECRET
+    ? new TextEncoder().encode(env.TENANT_COOKIE_SECRET)
+    : null;
 }
 
-/** Every active org membership for the authenticated user (empty when anonymous). */
-export async function getSessionOrgs(): Promise<SessionOrg[]> {
-  const authUserId = await getSessionUserId();
-  if (!authUserId) return [];
+export async function getSessionUserId(): Promise<string | null> {
+  const supabase = await createClient();
+  // getSession() reads the session from cookies with NO network call; verifyAccessToken
+  // then checks the ES256 signature locally against the project JWKS. Together: a secure
+  // identity check with zero per-render round-trip to the Supabase Auth server.
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session?.access_token) return null;
+  const verified = await verifyAccessToken(session.access_token);
+  return verified?.sub ?? null;
+}
+
+/** Live DB lookup of every active org membership for an auth user id. */
+export async function querySessionOrgs(authUserId: string): Promise<SessionOrg[]> {
   const { rows } = await pool().query<{
     organization_id: string;
     slug: string | null;
@@ -52,14 +72,43 @@ export async function getSessionOrgs(): Promise<SessionOrg[]> {
   }));
 }
 
-/** The set of UEIs (uppercased) the session user may read. */
-export async function getSessionOrgUeis(): Promise<Set<string>> {
-  const orgs = await getSessionOrgs();
+/**
+ * Every active org membership for the authenticated user (empty when anonymous).
+ * LIVE query — used by the privileged mutation guards, which must see revocations at once.
+ */
+export async function getSessionOrgs(): Promise<SessionOrg[]> {
+  const authUserId = await getSessionUserId();
+  if (!authUserId) return [];
+  return querySessionOrgs(authUserId);
+}
+
+function ueisOf(orgs: SessionOrg[]): Set<string> {
   return new Set(
-    orgs
-      .map((o) => o.uei?.toUpperCase())
-      .filter((u): u is string => Boolean(u)),
+    orgs.map((o) => o.uei?.toUpperCase()).filter((u): u is string => Boolean(u)),
   );
+}
+
+/**
+ * The set of UEIs (uppercased) the session user may READ.
+ *
+ * Read-hot dashboard path: tries the sign-in-scoped, user-bound `gc_tenant` cookie first
+ * (zero DB round-trip), falling back to the live membership query on miss / expiry /
+ * sub-mismatch. A forged or cross-user cookie fails verification and falls through.
+ */
+export async function getSessionOrgUeis(): Promise<Set<string>> {
+  const authUserId = await getSessionUserId();
+  if (!authUserId) return new Set();
+
+  const key = tenantSecret();
+  if (key) {
+    const cached = (await cookies()).get(TENANT_COOKIE_NAME)?.value;
+    if (cached) {
+      const orgs = await readTenantToken(key, cached, authUserId);
+      if (orgs) return ueisOf(orgs);
+    }
+  }
+
+  return ueisOf(await querySessionOrgs(authUserId));
 }
 
 /**

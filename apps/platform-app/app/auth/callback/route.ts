@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { establishTenantSession } from '@/lib/auth/tenant-session';
 
 /**
  * Magic-link / OAuth callback: exchange the auth code for a session, then send the
@@ -40,6 +41,10 @@ export async function GET(request: NextRequest) {
   if (error) {
     return redirectTo(`/login?error=${encodeURIComponent(error.message)}`);
   }
+
+  // Resolve the tenant once, now, into the signed cookie so dashboard renders skip the
+  // per-request membership query. Best-effort — the read path falls back to the live query.
+  await establishTenantSession();
 
   return redirectTo(next);
 }
