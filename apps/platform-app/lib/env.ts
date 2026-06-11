@@ -6,8 +6,13 @@ const schema = z
     NEXT_PUBLIC_GC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
     GC_DB_URL_POOLED: z.string().min(1),
     APP_ENV: z.enum(['dev', 'stg', 'prd']),
-    // catalyst_api (core-x) — the private read gateway the BFF proxies to. Optional
-    // in dev (the catalyst client falls back to an empty-state path when unset);
+    // platform-api BFF base URL. When set, the catalyst client brokers reads through the
+    // BFF (forwarding the user JWT) instead of calling core-x directly. Optional + no prd
+    // requirement on purpose: unset reverts to the direct-core-x path, so the phase-2
+    // cutover is a reversible Doppler flip. (See lib/catalyst/client.ts.)
+    API_BASE_URL: z.string().url().optional(),
+    // catalyst_api (core-x) — the private read gateway. Direct/legacy read path + the
+    // value the BFF itself proxies to. Optional in dev (empty-state fallback when unset);
     // required in stg/prd — see the fail-closed refine below.
     CATALYST_API_URL: z.string().url().optional(),
     CATALYST_API_TOKEN: z.string().min(1).optional(),
@@ -38,6 +43,7 @@ const parsed = schema.safeParse({
     process.env.NEXT_PUBLIC_GC_SUPABASE_PUBLISHABLE_KEY,
   GC_DB_URL_POOLED: process.env.GC_DB_URL_POOLED,
   APP_ENV: process.env.APP_ENV,
+  API_BASE_URL: process.env.API_BASE_URL,
   CATALYST_API_URL: process.env.CATALYST_API_URL,
   CATALYST_API_TOKEN: process.env.CATALYST_API_TOKEN,
   TENANT_COOKIE_SECRET: process.env.TENANT_COOKIE_SECRET,
