@@ -2,6 +2,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { env } from '@/lib/env';
+import { TENANT_COOKIE_NAME } from '@/lib/auth/tenant-cookie';
 
 /**
  * Sign-out endpoint — a native POST target, deliberately NOT a server action.
@@ -37,5 +38,6 @@ export async function POST() {
   );
 
   await supabase.auth.signOut();
+  res.cookies.delete(TENANT_COOKIE_NAME);
   return res;
 }
