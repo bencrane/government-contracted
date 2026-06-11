@@ -20,11 +20,12 @@
  * bodies) pass through verbatim. The BFF synthesizes nothing.
  */
 
-import { Hono } from "hono";
+import { type Context, Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 
 import { requireUser, type AuthVariables } from "../auth.ts";
 import { env } from "../env.ts";
+import { ownedUeis } from "../lib/orgs.ts";
 
 export const entityRoutes = new Hono<{ Variables: AuthVariables }>();
 
@@ -50,10 +51,42 @@ export function clampLimit(raw: string | undefined): number {
   return Math.min(100, Math.max(1, n));
 }
 
-async function proxy(uei: string, surface: string, qs = ""): Promise<Response> {
-  if (!UEI_RE.test(uei)) {
+async function proxy(
+  c: Context<{ Variables: AuthVariables }>,
+  surface: string,
+  qs = "",
+): Promise<Response> {
+  const raw = c.req.param("uei");
+  if (!raw || !UEI_RE.test(raw)) {
     throw new HTTPException(400, { message: "Malformed UEI" });
   }
+  // Canonicalize to uppercase ONCE and use it for BOTH the authz check and the upstream
+  // URL. Stored UEIs are uppercase and core-x's lookup is case-sensitive, so a single
+  // canonical form keeps the owned-set comparison and the core-x query byte-identical —
+  // a caller sending a lowercase (owned) UEI must not pass authz and then 404 at core-x.
+  const uei = raw.toUpperCase();
+
+  // Authorization: the UEI must belong to one of the caller's ACTIVE orgs. A non-owned
+  // UEI returns 404 — indistinguishable from "core-x doesn't know this entity" — so the
+  // surface cannot enumerate which UEIs exist or are provisioned. The membership is
+  // resolved live (a revoked membership denies immediately). The Next app also authorizes
+  // upstream (resolveTenantUei); this makes the BFF self-sufficient for the SPA, which
+  // will call it directly with no upstream guard.
+  const user = c.get("user");
+  let owned: Set<string>;
+  try {
+    owned = await ownedUeis(user.user_id);
+  } catch (err) {
+    // DB unavailable → cannot authorize. Fail to a 503 the client degrades to empty-state
+    // (same posture as core-x-unavailable), never an open read and never a 500.
+    const name = err instanceof Error ? err.name : "error";
+    throw new HTTPException(503, { message: `authorization unavailable (${name})` });
+  }
+  if (!owned.has(uei)) {
+    console.warn(`entities: user ${user.user_id} denied UEI ${uei} (not an active-org UEI)`);
+    throw new HTTPException(404, { message: "Not found" });
+  }
+
   const url = `${env.COREX_API_URL}/api/v1/entities/${uei}/${surface}${qs}`;
 
   let res: Response;
@@ -81,14 +114,14 @@ async function proxy(uei: string, surface: string, qs = ""): Promise<Response> {
   return new Response(body, { status: res.status, headers: { "content-type": contentType } });
 }
 
-entityRoutes.get("/:uei/overview", (c) => proxy(c.req.param("uei"), "overview"));
+entityRoutes.get("/:uei/overview", (c) => proxy(c, "overview"));
 
-entityRoutes.get("/:uei/sam-profile", (c) => proxy(c.req.param("uei"), "sam-profile"));
+entityRoutes.get("/:uei/sam-profile", (c) => proxy(c, "sam-profile"));
 
 entityRoutes.get("/:uei/active-contracts", (c) =>
-  proxy(c.req.param("uei"), "active-contracts", `?limit=${clampLimit(c.req.query("limit"))}`),
+  proxy(c, "active-contracts", `?limit=${clampLimit(c.req.query("limit"))}`),
 );
 
 entityRoutes.get("/:uei/past-performance", (c) =>
-  proxy(c.req.param("uei"), "past-performance", `?limit=${clampLimit(c.req.query("limit"))}`),
+  proxy(c, "past-performance", `?limit=${clampLimit(c.req.query("limit"))}`),
 );
