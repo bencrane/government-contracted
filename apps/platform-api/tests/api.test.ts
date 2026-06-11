@@ -46,14 +46,15 @@ describe("envSchema prd fail-closed guards", () => {
     GC_SUPABASE_URL: "https://htgfjmjuzcqffdzuiphg.supabase.co",
     COREX_SERVICE_TOKEN: "tok",
   };
-  const PRIVATE_COREX = "http://catalyst-api.railway.internal:8080";
-  const PUBLIC_COREX = "https://catalyst-api-production-7d44.up.railway.app";
+  const COREX_TLS = "https://api.catalystdev.run"; // public host over TLS — OK
+  const COREX_PRIVATE = "http://catalyst-api.railway.internal:8080"; // private net over http — OK
+  const COREX_HTTP_PUBLIC = "http://catalyst-api-production-7d44.up.railway.app"; // plaintext public — rejected
   const SPA_ORIGIN = "https://app.governmentcontracted.com";
 
-  it("rejects a public *.up.railway.app COREX_API_URL in prd (token-over-public-net guard)", () => {
+  it("rejects plaintext http to a public core-x host in prd (token-over-cleartext guard)", () => {
     const r = envSchema.safeParse({
       ...base,
-      COREX_API_URL: PUBLIC_COREX,
+      COREX_API_URL: COREX_HTTP_PUBLIC,
       ALLOWED_ORIGINS: SPA_ORIGIN,
       APP_ENV: "prd",
     });
@@ -63,30 +64,40 @@ describe("envSchema prd fail-closed guards", () => {
     }
   });
 
-  it("rejects a missing / localhost ALLOWED_ORIGINS in prd", () => {
-    const missing = envSchema.safeParse({ ...base, COREX_API_URL: PRIVATE_COREX, APP_ENV: "prd" });
-    expect(missing.success).toBe(false);
-    const localhost = envSchema.safeParse({
-      ...base,
-      COREX_API_URL: PRIVATE_COREX,
-      ALLOWED_ORIGINS: "http://localhost:5173",
-      APP_ENV: "prd",
-    });
-    expect(localhost.success).toBe(false);
-  });
-
-  it("accepts a private core-x + real SPA origin in prd", () => {
+  it("accepts a public core-x host over https in prd", () => {
     const r = envSchema.safeParse({
       ...base,
-      COREX_API_URL: PRIVATE_COREX,
+      COREX_API_URL: COREX_TLS,
       ALLOWED_ORIGINS: SPA_ORIGIN,
       APP_ENV: "prd",
     });
     expect(r.success).toBe(true);
   });
 
-  it("is permissive outside prd — public host + no ALLOWED_ORIGINS is fine in dev", () => {
-    const r = envSchema.safeParse({ ...base, COREX_API_URL: PUBLIC_COREX, APP_ENV: "dev" });
+  it("accepts a private *.railway.internal core-x host over http in prd", () => {
+    const r = envSchema.safeParse({
+      ...base,
+      COREX_API_URL: COREX_PRIVATE,
+      ALLOWED_ORIGINS: SPA_ORIGIN,
+      APP_ENV: "prd",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects a missing / localhost ALLOWED_ORIGINS in prd", () => {
+    const missing = envSchema.safeParse({ ...base, COREX_API_URL: COREX_TLS, APP_ENV: "prd" });
+    expect(missing.success).toBe(false);
+    const localhost = envSchema.safeParse({
+      ...base,
+      COREX_API_URL: COREX_TLS,
+      ALLOWED_ORIGINS: "http://localhost:5173",
+      APP_ENV: "prd",
+    });
+    expect(localhost.success).toBe(false);
+  });
+
+  it("is permissive outside prd — plaintext http public host + no ALLOWED_ORIGINS is fine in dev", () => {
+    const r = envSchema.safeParse({ ...base, COREX_API_URL: COREX_HTTP_PUBLIC, APP_ENV: "dev" });
     expect(r.success).toBe(true);
   });
 });

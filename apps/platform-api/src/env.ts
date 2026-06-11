@@ -36,9 +36,10 @@ export const envSchema = z
     // from this single URL (see SUPABASE_ISSUER / SUPABASE_JWKS_URL below), mirroring
     // platform-app/lib/auth/jwt.ts so the verifier is byte-for-byte the same posture.
     GC_SUPABASE_URL: z.string().url(),
-    // core-x catalyst_api — the Gen-3 read gateway. In prd this MUST be the PRIVATE
-    // Railway address (http://catalyst-api.railway.internal:8080) so core-x is never
-    // exposed publicly; the BFF is its only caller. Enforced by the prd guard below.
+    // core-x catalyst_api — the Gen-3 read gateway. In prd this is the core-x service
+    // address over TLS (https://api.catalystdev.run) or a private *.railway.internal
+    // host over http. The prd guard below rejects plaintext http to a public host so the
+    // COREX_SERVICE_TOKEN is never sent in the clear over an untrusted network.
     COREX_API_URL: z.string().url(),
     // Operator token presented to core-x as `Authorization: Bearer` (matches core-x's
     // CATALYST_API_TOKEN). This is the only thing that should ever hold it.
@@ -53,23 +54,29 @@ export const envSchema = z
     // that leaks the service token to the public internet or opens CORS to localhost.
     if (val.APP_ENV !== "prd") return;
 
-    // (1) core-x must be reached over the PRIVATE net in prd — never the public Railway
-    // host. The CATALYST_API_URL fallback currently resolves to a public *.up.railway.app
-    // URL; booting against it would carry COREX_SERVICE_TOKEN over the public internet,
-    // defeating the entire reason this BFF exists. Refuse to boot until it's private.
-    let host = "";
+    // (1) The COREX_SERVICE_TOKEN must never traverse an untrusted network in the clear.
+    // Two acceptable prd postures: a public core-x host over https (TLS protects the
+    // token — e.g. https://api.catalystdev.run), or a private *.railway.internal host
+    // over http (plaintext is fine on the private net). Reject plaintext http to a public
+    // host — that is the footgun (the CATALYST_API_URL fallback is a plain Railway URL).
+    let corexUrl: URL | null = null;
     try {
-      host = new URL(val.COREX_API_URL).hostname;
+      corexUrl = new URL(val.COREX_API_URL);
     } catch {
       /* z.string().url() already rejects malformed values */
     }
-    if (host.endsWith(".up.railway.app")) {
+    if (
+      corexUrl &&
+      corexUrl.protocol !== "https:" &&
+      !corexUrl.hostname.endsWith(".railway.internal")
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["COREX_API_URL"],
         message:
-          "in prd COREX_API_URL must be the PRIVATE core-x address (got a public *.up.railway.app host) " +
-          "— set COREX_API_URL=http://catalyst-api.railway.internal:8080 in hq-government-contracted/prd",
+          "in prd COREX_API_URL must use https for a public host (TLS protects the service " +
+          "token — e.g. https://api.catalystdev.run) or a private *.railway.internal host " +
+          "over http — got plaintext http to a public host",
       });
     }
 
