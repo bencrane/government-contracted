@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { type AuthVariables, requireUser } from "../src/auth.ts";
 import { envSchema } from "../src/env.ts";
+import { type ActiveOrg, landingFor, ueiSet } from "../src/lib/orgs.ts";
 import { UEI_RE, clampLimit } from "../src/routes/entities.ts";
 
 describe("requireUser (the BFF auth gate)", () => {
@@ -45,6 +46,7 @@ describe("envSchema prd fail-closed guards", () => {
   const base = {
     GC_SUPABASE_URL: "https://htgfjmjuzcqffdzuiphg.supabase.co",
     COREX_SERVICE_TOKEN: "tok",
+    GC_DB_URL_POOLED: "postgres://user:pw@localhost:5432/db",
   };
   const COREX_TLS = "https://api.catalystdev.run"; // public host over TLS — OK
   const COREX_PRIVATE = "http://catalyst-api.railway.internal:8080"; // private net over http — OK
@@ -99,6 +101,61 @@ describe("envSchema prd fail-closed guards", () => {
   it("is permissive outside prd — plaintext http public host + no ALLOWED_ORIGINS is fine in dev", () => {
     const r = envSchema.safeParse({ ...base, COREX_API_URL: COREX_HTTP_PUBLIC, APP_ENV: "dev" });
     expect(r.success).toBe(true);
+  });
+});
+
+describe("landingFor (mirror app/page.tsx policy)", () => {
+  const org = (o: Partial<ActiveOrg>): ActiveOrg => ({
+    orgId: "o1",
+    slug: null,
+    category: "contractor",
+    uei: null,
+    ...o,
+  });
+
+  it("no active org → /access-expired, org null", () => {
+    expect(landingFor([])).toEqual({ redirect: "/access-expired", org: null });
+  });
+
+  it("first org has a uei → contractor dashboard", () => {
+    const o = org({ uei: "CW52DR9J9DY4" });
+    expect(landingFor([o]).redirect).toBe("/dashboard/CW52DR9J9DY4");
+  });
+
+  it("first org has no uei but a slug → partner portal", () => {
+    const o = org({ category: "capital_provider", slug: "acme-capital" });
+    expect(landingFor([o]).redirect).toBe("/partner/acme-capital/spec");
+  });
+
+  it("first org has neither uei nor slug → /access-expired (but org echoed)", () => {
+    const o = org({ slug: null, uei: null });
+    const r = landingFor([o]);
+    expect(r.redirect).toBe("/access-expired");
+    expect(r.org).toEqual(o);
+  });
+
+  it("uei wins over slug, and only the FIRST org decides", () => {
+    const first = org({ uei: "CW52DR9J9DY4", slug: "ignored" });
+    const second = org({ orgId: "o2", uei: "ZZ52DR9J9DY9" });
+    expect(landingFor([first, second]).redirect).toBe("/dashboard/CW52DR9J9DY4");
+  });
+});
+
+describe("ueiSet (authorization set: uppercased, null-filtered)", () => {
+  it("uppercases and drops null UEIs", () => {
+    const orgs: ActiveOrg[] = [
+      { orgId: "1", slug: null, category: "contractor", uei: "cw52dr9j9dy4" },
+      { orgId: "2", slug: "p", category: "partner", uei: null },
+      { orgId: "3", slug: null, category: "contractor", uei: "ZZ52DR9J9DY9" },
+    ];
+    const s = ueiSet(orgs);
+    expect(s.has("CW52DR9J9DY4")).toBe(true);
+    expect(s.has("ZZ52DR9J9DY9")).toBe(true);
+    expect(s.size).toBe(2);
+  });
+
+  it("empty orgs → empty set", () => {
+    expect(ueiSet([]).size).toBe(0);
   });
 });
 

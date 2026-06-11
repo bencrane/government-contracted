@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { pool } from "@/lib/audience-specs/db";
+import { env } from "@/lib/env";
+import { bffLanding } from "@/lib/landing";
 
 export default async function RootPage() {
   const supabase = await createClient();
@@ -9,6 +11,19 @@ export default async function RootPage() {
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+
+  // Phase-3: resolve the landing target via the BFF when configured. On any BFF failure
+  // (returns null) we fall through to the local query below — so a BFF blip never blocks
+  // login→landing, and the cutover is a reversible API_BASE_URL flip.
+  if (env.API_BASE_URL) {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      const target = await bffLanding(session.access_token);
+      if (target) redirect(target);
+    }
+  }
 
   // Find the first active org the user belongs to. Send partner-org members to
   // their spec list; contractor-org members to their contractor dashboard.

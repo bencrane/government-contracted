@@ -14,20 +14,25 @@ reads over the private network so **core-x is never exposed to the public web**.
   after the first JWKS fetch.
 - `GET /health` — unauthenticated liveness probe (Railway healthcheck).
 - `GET /api/v1/me` — returns the authenticated user's `user_id`, `email`, `app_env`.
+- `GET /api/v1/me/landing` — resolves the user's first active org → `{ redirect, org }`
+  (contractor dashboard / partner portal / `/access-expired`), replacing `app/page.tsx`'s
+  membership query. Org membership is read live from Postgres (`src/lib/orgs.ts`).
 - `GET /api/v1/entities/:uei/{overview,sam-profile,active-contracts,past-performance}` —
   brokers the 4 core-x `catalyst_api` reads. The user's Supabase JWT is validated here,
   then the BFF calls core-x with the internal `COREX_SERVICE_TOKEN` (the user's JWT is
   **not** forwarded). `?limit=N` (clamped `1..100`, default 25) applies to the two
   award lists. The core-x `{ data }` envelope + status (incl. 404) pass through verbatim.
 
-The `:uei` is regex-locked to `^[A-Za-z0-9]{12}$` — both a correctness check and an
-SSRF / path-injection guard on the upstream URL.
+**Authorization.** The `:uei` is regex-locked to `^[A-Za-z0-9]{12}$` (SSRF / path-injection
+guard) **and** must belong to one of the caller's active orgs — resolved live per request
+from Postgres (`GC_DB_URL_POOLED`, no service-role key). A non-owned UEI returns `404`
+(indistinguishable from "unknown entity", so the surface can't enumerate UEIs); a DB outage
+returns `503` (the client degrades to empty-state). This makes the BFF self-sufficient for
+the SPA, which calls it directly with no upstream guard.
 
 ### Deferred (later phase-2 steps, intentionally not here)
 
-- `GET /api/v1/me/landing` — resolve the user's first active org → redirect target
-  (replaces `app/page.tsx`'s membership query). Lands with the auth/landing move (step 3).
-- Repointing `platform-app` at this BFF (step 2 cutover, reversible).
+- Dropping the factoring/partner surface (step 4) and the Next→Vite SPA swap (step 5).
 
 ## Local dev
 
@@ -73,10 +78,19 @@ applies and the scheme guard is inert.
 
 ## Deployment
 
-Railway service builds from `apps/platform-api/Dockerfile` (build context = repo root).
-Auto-deploys from `main` via GitHub sync. After Railway creates the service, set the
-Doppler token:
+Railway service `platform-api` in the `government-contracted` project. Live at
+**`https://api.governmentcontracted.com`** (custom domain, TLS) — also reachable at its
+`*.up.railway.app` domain. `DOPPLER_TOKEN` (a read service token for
+`hq-government-contracted/prd`) and `RAILWAY_DOCKERFILE_PATH=apps/platform-api/Dockerfile`
+are set as Railway service variables.
+
+Deploy from a clean `main` checkout with the Railway CLI (GitHub auto-deploy is not wired
+for this service):
 
 ```bash
-doppler configs tokens create prd-railway --project hq-government-contracted --config prd --plain
+railway up --service platform-api --ci   # build context = repo root, .gitignore-filtered
 ```
+
+`API_BASE_URL` in `hq-government-contracted/prd` points platform-app at this BFF
+(`https://api.governmentcontracted.com`); unset reverts platform-app to the legacy
+direct-core-x read path.

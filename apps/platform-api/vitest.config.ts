@@ -11,6 +11,7 @@ export default defineConfig({
       GC_SUPABASE_URL: "https://example.supabase.co",
       COREX_API_URL: "http://localhost:9",
       COREX_SERVICE_TOKEN: "test-token",
+      GC_DB_URL_POOLED: "postgres://user:pw@localhost:5432/db",
       APP_ENV: "dev",
     },
   },

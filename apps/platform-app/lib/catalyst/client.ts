@@ -58,10 +58,10 @@ async function sessionAccessToken(): Promise<string | null> {
  * directly. The BFF holds the core-x service token, validates the forwarded user JWT,
  * and returns the SAME `{ data }` envelope verbatim — so the unwrap is identical.
  *
- * Tenant authorization still happens UPSTREAM of this call (resolveTenantUei →
- * getSessionOrgUeis), exactly as on the direct path: the BFF authenticates the user but
- * does not yet authorize the UEI against the user's orgs (that lands with the auth/landing
- * move). Callers MUST therefore continue to pass only a session-resolved tenant UEI.
+ * Tenant authorization happens in TWO places now (defense in depth): UPSTREAM here via
+ * resolveTenantUei → getSessionOrgUeis (which also drives the redirect-to-login + 404
+ * page behavior), AND inside the BFF, which re-resolves the caller's active-org UEIs live
+ * and 404s a non-owned UEI. Callers still pass only a session-resolved tenant UEI.
  */
 async function getJsonViaBff<T>(uei: string, surface: string): Promise<T | null> {
   const token = await sessionAccessToken();

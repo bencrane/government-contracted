@@ -25,6 +25,7 @@ import { z } from "zod";
 const supabaseUrl = process.env.GC_SUPABASE_URL ?? process.env.NEXT_PUBLIC_GC_SUPABASE_URL;
 const corexApiUrl = process.env.COREX_API_URL ?? process.env.CATALYST_API_URL;
 const corexServiceToken = process.env.COREX_SERVICE_TOKEN ?? process.env.CATALYST_API_TOKEN;
+const dbUrlPooled = process.env.GC_DB_URL_POOLED;
 
 // Local-dev CORS default: the Vite SPA (5173) + the current Next app (3001). Applied
 // ONLY outside prd (see below) — it must never silently stand in for a real prod origin.
@@ -44,6 +45,10 @@ export const envSchema = z
     // Operator token presented to core-x as `Authorization: Bearer` (matches core-x's
     // CATALYST_API_TOKEN). This is the only thing that should ever hold it.
     COREX_SERVICE_TOKEN: z.string().min(1),
+    // Supabase POOLED Postgres connection — the BFF's authorization + landing source of
+    // truth (org memberships). Same value platform-app uses. Required: the BFF cannot
+    // authorize a UEI or resolve landing without it.
+    GC_DB_URL_POOLED: z.string().min(1),
     // Comma-separated CORS allow-list. Optional here so the localhost default can be
     // applied post-parse OUTSIDE prd; in prd it is required + must be a real origin.
     ALLOWED_ORIGINS: z.string().optional(),
@@ -100,6 +105,7 @@ const parsed = envSchema.safeParse({
   GC_SUPABASE_URL: supabaseUrl,
   COREX_API_URL: corexApiUrl,
   COREX_SERVICE_TOKEN: corexServiceToken,
+  GC_DB_URL_POOLED: dbUrlPooled,
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
   APP_ENV: process.env.APP_ENV,
 });

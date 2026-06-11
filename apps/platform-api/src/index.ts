@@ -18,10 +18,12 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
 
 import { type AuthVariables, requireUser } from "./auth.ts";
 import { allowedOrigins, env } from "./env.ts";
+import { activeOrgs, landingFor } from "./lib/orgs.ts";
 import { entityRoutes } from "./routes/entities.ts";
 
 const app = new Hono<{ Variables: AuthVariables & { requestId: string } }>();
@@ -46,6 +48,22 @@ app.get("/health", (c) =>
 app.get("/api/v1/me", requireUser, (c) => {
   const user = c.get("user");
   return c.json({ user_id: user.user_id, email: user.email, app_env: env.APP_ENV });
+});
+
+// Landing resolution — replaces app/page.tsx's membership query. Resolves the user's
+// first active org → redirect target ({ redirect, org }). The SPA (and the current Next
+// app, when repointed) consumes this for the post-login redirect.
+app.get("/api/v1/me/landing", requireUser, async (c) => {
+  const user = c.get("user");
+  try {
+    const orgs = await activeOrgs(user.user_id);
+    return c.json(landingFor(orgs));
+  } catch (err) {
+    // DB unavailable → caller falls back to its own resolution (the Next app keeps a
+    // local query; the SPA can retry). 503, never a 500.
+    const name = err instanceof Error ? err.name : "error";
+    throw new HTTPException(503, { message: `landing unavailable (${name})` });
+  }
 });
 
 app.route("/api/v1/entities", entityRoutes);
