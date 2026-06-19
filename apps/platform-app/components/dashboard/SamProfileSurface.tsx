@@ -95,9 +95,9 @@ export default function SamProfileSurface({
           {profile.governmentPocs.length === 0 ? (
             <p className="text-sm text-slate-500">No POC slots populated for this entity.</p>
           ) : (
-            <div className="grid grid-cols-1 gap-px bg-line md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {profile.governmentPocs.map((poc, i) => (
-                <div key={`${poc.type}-${poc.pocSlotNo ?? i}`} className="bg-surface p-4">
+                <div key={`${poc.type}-${poc.pocSlotNo ?? i}`} className="border border-line bg-surface p-4">
                   <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-copper-700">
                     {(poc.type ?? 'poc').replace(/_/g, ' ')}
                   </p>
