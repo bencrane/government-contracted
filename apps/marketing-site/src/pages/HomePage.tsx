@@ -115,7 +115,13 @@ export default function HomePage() {
             lede="Live SAM.gov profile, every federal contract action since FY08, and quotes on surety, capital, vendor programs, equipment, and compliance — pegged to your UEI."
             cta={
               <>
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <Text size="body-sm" tone="muted" className="max-w-xl">
+                  Thirty seconds — UEI and email. Your registration and award
+                  history already exist on SAM.gov and USAspending.gov, scattered
+                  across millions of public filings. Claiming consolidates them
+                  into one profile.
+                </Text>
+                <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
                   <Button to="/claim" size="lg" trailingIcon={ArrowRight}>
                     Claim your entity
                   </Button>
