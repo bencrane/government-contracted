@@ -1,17 +1,16 @@
-import { ArrowRight, FileText, Calendar, AlertCircle } from "lucide-react";
 import { usePageTitle } from "@/lib/usePageTitle";
 import {
   Section,
   Container,
   Grid,
   Cols,
-  Card,
-  Button,
+  SectionHeader,
   Badge,
   Eyebrow,
   Heading,
   Text,
 } from "@/components/ui";
+import { CtaClose } from "@/components/marketing/CtaClose";
 
 type Resource = {
   category: "Regulatory" | "Compliance" | "Capture";
@@ -64,86 +63,92 @@ const categoryTone: Record<Resource["category"], "navy" | "slate" | "copper"> = 
   Capture: "copper",
 };
 
-const categoryIcons: Record<Resource["category"], React.ReactNode> = {
-  Regulatory: <FileText className="h-3.5 w-3.5" />,
-  Compliance: <Calendar className="h-3.5 w-3.5" />,
-  Capture: <AlertCircle className="h-3.5 w-3.5" />,
-};
-
 export default function ResourcesPage() {
   usePageTitle("Resources — Government Contracted");
 
+  const [featured, ...rest] = resources;
+
   return (
     <>
-      {/* HERO — cream band, seal wash */}
-      <Section tone="cream" spacing="base" divide bare className="seal-wash">
-        <Container width="wide">
-          <Eyebrow>Resources</Eyebrow>
-          <Heading level={1} className="mt-4">
-            FAR, compliance, capture —<br />
-            <span className="text-navy-700">in plain English.</span>
-          </Heading>
-          <Text size="body-lg" tone="muted" className="mt-6 max-w-2xl">
-            Federal acquisition updates, compliance deadline reminders, and
-            capture notes for registered contractors.
-          </Text>
+      {/* HERO — cream band, seal wash + paper grid */}
+      <Section
+        tone="cream"
+        spacing="base"
+        divide
+        bare
+        className="seal-wash relative overflow-hidden"
+      >
+        <div aria-hidden className="absolute inset-0 paper-grid opacity-50" />
+        <Container width="wide" className="relative">
+          <SectionHeader
+            eyebrow="Resources"
+            heading={
+              <>
+                FAR, compliance, capture —{" "}
+                <span className="text-navy-700">in plain English.</span>
+              </>
+            }
+            lede="Federal acquisition updates, compliance deadline reminders, and capture notes for registered contractors. Full write-ups publishing through 2026."
+          />
         </Container>
       </Section>
 
       {/* RESOURCE LIST — cream band */}
       <Section tone="cream" spacing="lg">
-        <ul className="divide-y divide-line border-y border-line">
-          {resources.map((r) => (
-            <li key={r.title} className="py-8">
-              <Grid cols={12} gap="sm">
-                <Cols span={12} spanMd={3}>
-                  <Badge tone={categoryTone[r.category]} icon={categoryIcons[r.category]}>
-                    {r.category}
-                  </Badge>
-                  <Text size="caption" tone="subtle" className="mt-3">
-                    {r.date}
-                  </Text>
-                </Cols>
-                <Cols span={12} spanMd={9}>
-                  <Heading level={3} className="text-[1.5rem] leading-tight">
-                    {r.title}
-                  </Heading>
-                  <Text size="body-sm" tone="muted" className="mt-3">
-                    {r.blurb}
-                  </Text>
-                  <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-navy-700">
-                    Full write-up coming soon
-                  </p>
-                </Cols>
-              </Grid>
-            </li>
-          ))}
-        </ul>
+        <div className="border-y border-line">
+          {/* Featured top row — the focal point */}
+          <article className="border-b border-line py-10">
+            <Eyebrow>Latest</Eyebrow>
+            <Grid cols={12} gap="sm" className="mt-6">
+              <Cols spanLg={4}>
+                <Badge tone={categoryTone[featured.category]}>
+                  {featured.category}
+                </Badge>
+                <Text size="caption" tone="subtle" className="mt-3">
+                  {featured.date}
+                </Text>
+              </Cols>
+              <Cols spanLg={8}>
+                <Heading level={2}>{featured.title}</Heading>
+                <Text size="body-lg" tone="muted" className="mt-4 max-w-2xl">
+                  {featured.blurb}
+                </Text>
+              </Cols>
+            </Grid>
+          </article>
+
+          {/* Compact rows */}
+          <ul className="divide-y divide-line">
+            {rest.map((r) => (
+              <li key={r.title} className="py-8">
+                <Grid cols={12} gap="sm">
+                  <Cols spanLg={4}>
+                    <Badge tone={categoryTone[r.category]}>{r.category}</Badge>
+                    <Text size="caption" tone="subtle" className="mt-3">
+                      {r.date}
+                    </Text>
+                  </Cols>
+                  <Cols spanLg={8}>
+                    <Heading level={3}>{r.title}</Heading>
+                    <Text size="body-sm" tone="muted" className="mt-3">
+                      {r.blurb}
+                    </Text>
+                  </Cols>
+                </Grid>
+              </li>
+            ))}
+          </ul>
+        </div>
       </Section>
 
-      {/* COMPLIANCE REMINDERS — slate band, navy-tinted card */}
-      <Section tone="slate" spacing="base" divide>
-        <Card surface="white" padding="md" className="border-navy-200">
-          <Grid cols={12} gap="md" align="center">
-            <Cols span={12} spanMd={8}>
-              <Eyebrow>Compliance reminders</Eyebrow>
-              <Heading level={2} className="mt-3 text-[1.5rem] md:text-[1.875rem]">
-                Filing deadlines pegged to your entity.
-              </Heading>
-              <Text size="body" tone="default" className="mt-3">
-                SAM renewal, CMMC assessment windows, set-aside
-                recertification, FAR/DFARS reps &amp; certs — reminders
-                set to your specific filing cadence.
-              </Text>
-            </Cols>
-            <Cols span={12} spanMd={4} className="md:text-right">
-              <Button to="/claim" trailingIcon={ArrowRight}>
-                Claim Your Entity
-              </Button>
-            </Cols>
-          </Grid>
-        </Card>
-      </Section>
+      {/* COMPLIANCE REMINDERS — navy closing CTA */}
+      <CtaClose
+        tone="navy"
+        eyebrow="Compliance reminders"
+        heading="Filing deadlines pegged to your entity."
+        lede="SAM renewal, CMMC windows, set-aside recertification, FAR/DFARS reps & certs — set to your specific filing cadence."
+        to="/claim"
+      />
     </>
   );
 }

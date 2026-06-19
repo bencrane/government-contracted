@@ -1,8 +1,20 @@
+import { type ElementType } from "react";
+import { ArrowRight } from "lucide-react";
 import GoldenProfilePreview from "@/components/marketing/GoldenProfilePreview";
 import CategoryGrid from "@/components/marketing/CategoryGrid";
 import Manifesto from "@/components/marketing/Manifesto";
 import { usePageTitle } from "@/lib/usePageTitle";
-import { Section, Hero, Grid, Card, Eyebrow, Heading, Text, MonoLabel } from "@/components/ui";
+import {
+  Section,
+  Hero,
+  Grid,
+  Card,
+  Button,
+  Heading,
+  Text,
+  MonoLabel,
+  SectionHeader,
+} from "@/components/ui";
 
 const STEPS = [
   {
@@ -22,6 +34,51 @@ const STEPS = [
   },
 ];
 
+const [LEAD_STEP, ...SUPPORT_STEPS] = STEPS;
+
+function StepCard({
+  step,
+  title,
+  body,
+  lead = false,
+  as = "li",
+}: {
+  step: string;
+  title: string;
+  body: string;
+  lead?: boolean;
+  as?: ElementType;
+}) {
+  return (
+    <Card as={as} surface="white" padding="none" className="border-0 p-7 md:p-8">
+      <div
+        className={
+          lead
+            ? "flex flex-col gap-6 md:flex-row md:items-baseline md:gap-10"
+            : undefined
+        }
+      >
+        <MonoLabel
+          as="p"
+          className="font-display text-h3 not-italic tracking-tight text-copper-600"
+        >
+          {step}
+        </MonoLabel>
+        <div className={lead ? "md:max-w-2xl" : "mt-5"}>
+          <Heading level={3} className="text-navy-900">
+            {title}
+          </Heading>
+          {/* Body must NOT inherit the navy band's muted ramp (text-slate-300,
+              invisible on these white cards) — pin it to text-slate-600. */}
+          <Text size="body-sm" className="mt-3 text-slate-600">
+            {body}
+          </Text>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export default function HomePage() {
   usePageTitle("Government Contracted — The Dashboard for Federal Contractors");
 
@@ -29,7 +86,7 @@ export default function HomePage() {
     <>
       {/* HERO — cream band; Hero primitive shares the text-top / card-top datum */}
       <Section tone="cream" spacing="base" divide bare className="seal-wash overflow-hidden">
-        <div aria-hidden className="absolute inset-0 paper-grid opacity-60" />
+        <div aria-hidden className="absolute inset-0 paper-grid opacity-50" />
         <div className="relative">
           <Hero
             eyebrow="For registered federal contractors"
@@ -41,54 +98,63 @@ export default function HomePage() {
               </>
             }
             lede="Live SAM.gov profile, every federal contract action since FY08, and quotes on surety, capital, vendor programs, equipment, and compliance — pegged to your UEI."
-            footnote="Free for registered contractors · sourced from SAM.gov + USAspending.gov."
+            cta={
+              <>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <Button to="/claim" size="lg" trailingIcon={ArrowRight}>
+                    Claim your entity
+                  </Button>
+                  <Button to="/opportunities" variant="ghost" size="lg">
+                    See what it unlocks
+                  </Button>
+                </div>
+                <MonoLabel as="p" className="mt-6 text-slate-500">
+                  1.7M registered entities · contract actions indexed since FY08
+                </MonoLabel>
+              </>
+            }
             media={<GoldenProfilePreview />}
-            ratio="6/6"
+            ratio="7/5"
           />
         </div>
       </Section>
 
       {/* HOW IT WORKS — navy band */}
       <Section tone="navy" spacing="lg" divide>
-        <div className="mb-14 max-w-3xl">
-          <Eyebrow>How it works</Eyebrow>
-          <Heading level={2} className="mt-4 text-white">
-            From UEI to a live dashboard in about thirty seconds.
-          </Heading>
-        </div>
+        <SectionHeader
+          eyebrow="How it works"
+          heading="From UEI to a live dashboard in about thirty seconds."
+        />
 
-        <Grid cols={3} gap="px" as="ol" className="border border-line bg-line">
-          {STEPS.map((s) => (
-            <Card key={s.step} as="li" surface="white" padding="sm" className="border-0 md:p-10">
-              <MonoLabel as="p" className="text-copper-600">
-                Step {s.step}
-              </MonoLabel>
-              <Heading level={3} className="mt-5">
-                {s.title}
-              </Heading>
-              <Text size="body-sm" tone="muted" className="mt-3">
-                {s.body}
-              </Text>
-            </Card>
-          ))}
-        </Grid>
+        <ol className="flex flex-col gap-px border border-line bg-line">
+          {/* Lead step (01) carries more weight — full-width row, numeral and copy
+              run inline so it reads as the entry point, not one of three equal cells. */}
+          <StepCard {...LEAD_STEP} lead />
+          <li>
+            <Grid cols={2} gap="px" align="stretch" className="bg-line">
+              {SUPPORT_STEPS.map((s) => (
+                <StepCard key={s.step} {...s} as="div" />
+              ))}
+            </Grid>
+          </li>
+        </ol>
       </Section>
 
-      {/* WHAT'S INSIDE — cream band */}
+      {/* WHAT'S INSIDE — cream band; tighter teaser, not equal-weight to How it works */}
       <Section id="whats-inside" tone="cream" spacing="lg" divide>
-        <div className="mb-10 max-w-3xl">
-          <Eyebrow>What&apos;s inside</Eyebrow>
-          <Heading level={2} className="mt-4">
-            Solicitations to surety to capital — pegged to your UEI, in one place.
-          </Heading>
-          <Text size="body-lg" tone="muted" className="mt-5">
-            Each category matches against your live SAM.gov profile and your awards
-            history. The same UEI that unlocked your dashboard is what brokers,
-            lenders, and consultancies see when they reach out.
-          </Text>
-        </div>
+        <SectionHeader
+          eyebrow="What's inside"
+          heading="Solicitations to surety to capital — pegged to your UEI, in one place."
+          lede="Each category matches against your live SAM.gov profile and your awards history. The same UEI that unlocked your dashboard is what brokers, lenders, and consultancies see when they reach out."
+        />
 
         <CategoryGrid />
+
+        <div className="mt-8">
+          <Button to="/opportunities" variant="ghost" size="md" trailingIcon={ArrowRight}>
+            All six categories
+          </Button>
+        </div>
       </Section>
 
       {/* MANIFESTO — navy band; its final line is the CTA */}

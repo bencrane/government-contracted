@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 /** The status / cert / category chip — the SAM-status pill, the copper cert pills,
  *  and the resources category tags, unified. Sharp-cornered, hairline-bordered. */
 const badge = cva(
-  "inline-flex items-center gap-1.5 border px-2 py-0.5 text-[0.6875rem] font-semibold tracking-wide",
+  "inline-flex items-center gap-1.5 border px-2 py-0.5 text-mono-label",
   {
     variants: {
       tone: {

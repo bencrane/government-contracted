@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Landmark, CalendarClock, Building2, Hash } from "lucide-react";
-import { Button, Card, Badge, Stat, Tabs, MonoLabel, type TabItem } from "@/components/ui";
+import { Landmark, CalendarClock, Building2, Hash } from "lucide-react";
+import { Card, Badge, Stat, Tabs, Heading, MonoLabel, type TabItem } from "@/components/ui";
 import { EASE_BRAND } from "@/components/ui/tabs";
 
 // Sample golden profile — structurally faithful to the real `entity_profile_gold`
@@ -43,16 +43,11 @@ const PROFILE = {
     { name: "GSA · Public Buildings Service", amount: 4_000_000 },
     { name: "Dept. of the Navy · NAVFAC", amount: 3_000_000 },
   ],
-  pocs: [
-    { name: "Dana R. Whitfield", role: "Electronic Business POC" },
-    { name: "Marcus T. Bell", role: "Government Business POC" },
-  ],
 } as const;
 
 const TABS: TabItem[] = [
   { id: "agencies", label: "Agencies", panel: <AgenciesPanel /> },
   { id: "registration", label: "Registration", panel: <RegistrationPanel /> },
-  { id: "contacts", label: "Contacts", panel: <ContactsPanel /> },
 ];
 
 export default function GoldenProfilePreview() {
@@ -65,10 +60,10 @@ export default function GoldenProfilePreview() {
       <Card elevation="raised" className="overflow-hidden">
         {/* header — identity (persistent) */}
         <div className="border-b border-line bg-slate-50 px-6 py-5">
-          <p className="font-display text-[22px] leading-tight text-navy-900">
+          <Heading level={4} className="text-navy-900">
             {PROFILE.legalName}
-          </p>
-          <p className="mt-1.5 font-mono text-[11px] tracking-tight text-slate-500">
+          </Heading>
+          <p className="mt-1.5 font-mono text-mono-provenance text-slate-500">
             UEI {PROFILE.uei} · CAGE {PROFILE.cage} · {PROFILE.location}
           </p>
 
@@ -95,18 +90,9 @@ export default function GoldenProfilePreview() {
           />
         </div>
 
-        {/* tab bar + panels — fixed-height so the card never reflows */}
-        <Tabs items={TABS} defaultId="agencies" panelHeight={236} ariaLabel="Profile detail" />
-
-        {/* CTA + data provenance — static arrow, single Button source */}
-        <div className="px-6 py-5">
-          <Button to="/claim" size="sm" fullWidth trailingIcon={ArrowRight}>
-            Claim your entity
-          </Button>
-          <p className="mt-2.5 text-center text-[11px] text-slate-500">
-            Sourced from SAM.gov + USAspending.gov.
-          </p>
-        </div>
+        {/* tab bar + panels — fixed-height so the card never reflows; the
+            panel's bottom hairline is the card's deliberate document edge */}
+        <Tabs items={TABS} defaultId="agencies" panelHeight={196} ariaLabel="Profile detail" />
       </Card>
     </motion.div>
   );
@@ -132,7 +118,7 @@ function AgenciesPanel() {
                 <span className="font-mono text-xs tabular-nums text-slate-500">
                   {usd(a.amount)}
                 </span>
-                <span className="w-9 text-right font-mono text-[10px] tabular-nums text-slate-400">
+                <span className="w-9 text-right font-mono text-mono-label tabular-nums text-slate-400">
                   {share.toFixed(0)}%
                 </span>
               </div>
@@ -192,37 +178,9 @@ function RegistrationPanel() {
   );
 }
 
-function ContactsPanel() {
-  return (
-    <div className="px-6 py-5">
-      <MonoLabel as="p" className="mb-3">
-        Government POCs on file
-      </MonoLabel>
-      <ul className="space-y-2.5">
-        {PROFILE.pocs.map((p) => (
-          <li key={p.name} className="flex items-center gap-3 text-sm">
-            <span className="inline-flex h-7 w-7 flex-none items-center justify-center border border-line bg-slate-50 font-mono text-[10px] font-semibold text-slate-500">
-              {initials(p.name)}
-            </span>
-            <span className="flex-1 truncate text-slate-700">{p.name}</span>
-            <span className="font-mono text-[11px] text-slate-400">{p.role}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 function usd(n: number): string {
   if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(1)}B`;
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
   return `$${n.toFixed(0)}`;
-}
-
-function initials(name: string): string {
-  const parts = name.replace(/[^A-Za-z .]/g, "").split(" ").filter(Boolean);
-  const first = parts[0]?.[0] ?? "";
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
-  return (first + last).toUpperCase();
 }

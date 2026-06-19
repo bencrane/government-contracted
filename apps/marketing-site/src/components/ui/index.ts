@@ -6,6 +6,7 @@ export { Container } from "./container";
 export { Section } from "./section";
 export { Grid, Cols } from "./grid";
 export { Hero } from "./hero";
+export { SectionHeader } from "./section-header";
 
 export { Button } from "./button";
 export { Card } from "./card";
