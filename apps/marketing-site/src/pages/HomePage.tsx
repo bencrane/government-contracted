@@ -51,30 +51,45 @@ function StepCard({
 }) {
   return (
     <Card as={as} surface="white" padding="none" className="border-0 p-7 md:p-8">
-      <div
-        className={
-          lead
-            ? "flex flex-col gap-6 md:flex-row md:items-baseline md:gap-10"
-            : undefined
-        }
-      >
-        <MonoLabel
-          as="p"
-          className="font-display text-h3 not-italic tracking-tight text-copper-600"
-        >
-          {step}
-        </MonoLabel>
-        <div className={lead ? "md:max-w-2xl" : "mt-5"}>
-          <Heading level={3} className="text-navy-900">
-            {title}
-          </Heading>
-          {/* Body must NOT inherit the navy band's muted ramp (text-slate-300,
-              invisible on these white cards) — pin it to text-slate-600. */}
-          <Text size="body-sm" className="mt-3 text-slate-600">
+      {/* Body is pinned to slate-600 — NOT the navy band's muted ramp
+          (text-slate-300, invisible on these white cards). */}
+      {lead ? (
+        // Lead step: a width-filling editorial row — numeral + title on the
+        // left, body on the right — so the full-bleed lead card has no dead gap.
+        <div className="grid gap-x-12 gap-y-4 md:grid-cols-2 md:items-baseline">
+          <div className="flex items-baseline gap-6">
+            <MonoLabel
+              as="span"
+              className="font-display text-h3 not-italic tracking-tight text-copper-600"
+            >
+              {step}
+            </MonoLabel>
+            <Heading level={3} className="text-navy-900">
+              {title}
+            </Heading>
+          </div>
+          <Text size="body-sm" className="text-slate-600">
             {body}
           </Text>
         </div>
-      </div>
+      ) : (
+        <>
+          <MonoLabel
+            as="p"
+            className="font-display text-h3 not-italic tracking-tight text-copper-600"
+          >
+            {step}
+          </MonoLabel>
+          <div className="mt-5">
+            <Heading level={3} className="text-navy-900">
+              {title}
+            </Heading>
+            <Text size="body-sm" className="mt-3 text-slate-600">
+              {body}
+            </Text>
+          </div>
+        </>
+      )}
     </Card>
   );
 }
