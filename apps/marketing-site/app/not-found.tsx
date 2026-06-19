@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 export default function NotFound() {
   return (
     <section className="mx-auto max-w-3xl px-6 py-32 text-center">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+      <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
         404 / Not found
       </p>
       <h1 className="font-display mt-4 text-5xl text-navy-900 md:text-6xl text-balance">

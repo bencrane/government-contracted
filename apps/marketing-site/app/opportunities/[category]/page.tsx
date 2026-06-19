@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, ArrowLeft, Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { CATEGORIES, categoryBySlug } from "@/lib/opportunities";
 
 type Props = {
@@ -30,17 +30,9 @@ export default async function CategoryPage({ params }: Props) {
     <>
       <section className="seal-wash border-b border-line">
         <div className="mx-auto max-w-7xl px-6 pt-12 pb-16">
-          <Link
-            href="/opportunities"
-            className="group inline-flex items-center gap-1.5 text-sm text-slate-600 transition-colors hover:text-navy-700"
-          >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-            All Opportunities
-          </Link>
-
-          <div className="mt-8 grid gap-12 md:grid-cols-12 md:gap-16">
+          <div className="grid items-center gap-12 md:grid-cols-12 md:gap-16">
             <div className="md:col-span-7">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+              <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
                 {c.shortName}
               </p>
               <h1 className="font-display mt-4 text-5xl leading-[1.05] text-navy-900 text-balance md:text-6xl">
@@ -53,8 +45,8 @@ export default async function CategoryPage({ params }: Props) {
 
             <div className="md:col-span-5">
               <div className="border border-line-strong bg-white p-7 shadow-[0_24px_60px_-30px_rgba(15,26,46,0.18)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
-                  Get this in your dashboard
+                <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+                  Free for contractors
                 </p>
                 <h2 className="font-display mt-3 text-2xl text-navy-900">
                   Claim your entity.

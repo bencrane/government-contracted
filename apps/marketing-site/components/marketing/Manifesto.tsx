@@ -2,7 +2,7 @@ export default function Manifesto() {
   return (
     <section className="border-b border-line bg-navy-900 text-slate-100">
       <div className="mx-auto max-w-4xl px-6 py-24 md:py-28">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-300">
+        <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-300">
           Why this exists
         </p>
         <h2 className="font-display mt-5 text-4xl leading-[1.1] text-white text-balance md:text-5xl">

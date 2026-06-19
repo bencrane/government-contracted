@@ -69,7 +69,7 @@ export default function ResourcesPage() {
     <>
       <section className="seal-wash border-b border-line">
         <div className="mx-auto max-w-7xl px-6 pt-16 pb-12 md:pt-20">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
             Resources
           </p>
           <h1 className="font-display mt-4 text-5xl leading-[1.05] text-navy-900 text-balance md:text-6xl">
@@ -121,7 +121,7 @@ export default function ResourcesPage() {
           <div className="border border-navy-200 bg-white p-8 md:p-10">
             <div className="grid gap-8 md:grid-cols-12 md:items-center">
               <div className="md:col-span-8">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+                <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
                   Compliance reminders
                 </p>
                 <h2 className="font-display mt-3 text-2xl text-navy-900 md:text-3xl text-balance">

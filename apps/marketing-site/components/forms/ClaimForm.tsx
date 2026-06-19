@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { submitClaim, type ClaimState } from "@/lib/actions/claim";
 import { Field, TextArea, TextInput } from "./Field";
 
@@ -119,10 +119,7 @@ export default function ClaimForm({
         </>
       )}
 
-      <div className="flex flex-col items-start gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-slate-500">
-          Dashboard link emailed within a few minutes.
-        </p>
+      <div className="flex justify-center border-t border-line pt-5">
         <SubmitButton />
       </div>
     </form>
@@ -143,10 +140,7 @@ function SubmitButton() {
           Claiming
         </>
       ) : (
-        <>
-          Claim Entity
-          <ArrowRight className="h-4 w-4" />
-        </>
+        "Claim Entity"
       )}
     </button>
   );
