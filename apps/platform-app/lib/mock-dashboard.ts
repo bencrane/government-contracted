@@ -141,6 +141,8 @@ export type Deadline = {
   dueDate: string;
   daysToDue: number;
   status: HealthStatus;
+  /** false ⇒ hydrated from live data; absent/true ⇒ mock placeholder. */
+  isMock?: boolean;
 };
 
 export type FeedEvent = {
@@ -162,6 +164,8 @@ export type FeedEvent = {
   primaryAction?: { label: string; href: string };
   secondaryAction?: { label: string; href: string };
   status?: HealthStatus;
+  /** false ⇒ hydrated from live data; absent/true ⇒ mock placeholder. */
+  isMock?: boolean;
 };
 
 export type InboxCategory =

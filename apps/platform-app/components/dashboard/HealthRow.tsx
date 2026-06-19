@@ -12,7 +12,8 @@ type Props = {
   surety: SuretyOnFile;
   worstCompliance: ComplianceCheck;
   activeContractsCount: number;
-  flagMock?: boolean;
+  suretyMock?: boolean;
+  complianceMock?: boolean;
 };
 
 const statusIcon: Record<HealthStatus, React.ReactNode> = {
@@ -27,7 +28,7 @@ const statusBadge: Record<HealthStatus, string> = {
   alert: "border-red-200 bg-red-50 text-red-800",
 };
 
-export default function HealthRow({ sam, surety, worstCompliance, activeContractsCount, flagMock = false }: Props) {
+export default function HealthRow({ sam, surety, worstCompliance, activeContractsCount, suretyMock = false, complianceMock = false }: Props) {
   return (
     <section className="border-b border-line bg-slate-100/60">
       <div className="mx-auto max-w-[1400px] grid grid-cols-1 divide-y divide-line md:grid-cols-4 md:divide-x md:divide-y-0">
@@ -42,7 +43,7 @@ export default function HealthRow({ sam, surety, worstCompliance, activeContract
           value={surety.aggregateLimit}
           detail={`${surety.surety} · expires ${surety.expires}`}
           status={surety.status}
-          isMock={flagMock}
+          isMock={suretyMock}
         />
         <Tile
           label="Active contracts"
@@ -55,7 +56,7 @@ export default function HealthRow({ sam, surety, worstCompliance, activeContract
           value={worstCompliance.status === "good" ? "OK" : worstCompliance.status === "warn" ? "Watch" : "Action"}
           detail={worstCompliance.detail}
           status={worstCompliance.status}
-          isMock={flagMock}
+          isMock={complianceMock}
         />
       </div>
     </section>
