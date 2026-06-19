@@ -1,7 +1,7 @@
 import { type FormEvent, useState } from "react";
 import { CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 import { submitContact, type ContactState } from "@/lib/submit";
-import { Button } from "@/components/ui";
+import { Button, Heading, Text } from "@/components/ui";
 import { Field, TextArea, TextInput } from "./Field";
 
 const initial: ContactState = { ok: false };
@@ -29,10 +29,12 @@ export default function ContactForm() {
     return (
       <div className="border border-copper-200 bg-copper-50 p-10 text-center">
         <CheckCircle2 className="mx-auto h-10 w-10 text-copper-600" />
-        <h3 className="font-display mt-5 text-2xl text-navy-900">Sent.</h3>
-        <p className="mt-3 text-sm text-slate-700">
+        <Heading level={3} className="mt-5 text-navy-900">
+          Sent.
+        </Heading>
+        <Text size="body-sm" className="mt-3">
           {state.message ?? "Got it. We'll be in touch."}
-        </p>
+        </Text>
       </div>
     );
   }
@@ -111,7 +113,7 @@ function SubmitButton({ pending }: { pending: boolean }) {
   }
   return (
     <Button type="submit" trailingIcon={ArrowRight}>
-      Send Message
+      Send message
     </Button>
   );
 }

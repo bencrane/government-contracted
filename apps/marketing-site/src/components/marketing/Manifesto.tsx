@@ -1,4 +1,6 @@
-import { Section, Eyebrow, Heading, Text } from "@/components/ui";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import { Section, Eyebrow, Heading, Text, Button } from "@/components/ui";
 
 export default function Manifesto() {
   return (
@@ -32,17 +34,24 @@ export default function Manifesto() {
           one dashboard.
         </Text>
         <Text size="body-lg" tone="muted">
-          Free for registered contractors. Paid for by the partners — surety
-          agents, capital lenders, vendor program operators, equipment
-          financiers, compliance and capture consultancies — who want to
-          reach contractors at their specific underwriting profile. The
-          contractor decides whether to take the conversation. No cold lists,
-          no scraped emails, no sold data.
+          Free for registered contractors, paid for by{" "}
+          <Link
+            to="/about"
+            className="text-white underline underline-offset-4 hover:text-copper-300"
+          >
+            the partners
+          </Link>{" "}
+          who fit your profile.
         </Text>
         <Text size="body-lg" tone="muted" className="text-white">
-          If you have an active SAM registration, this is for you. Type your
-          UEI above. We have your awards.
+          If you have an active SAM registration, this is for you.
         </Text>
+      </div>
+
+      <div className="mt-10">
+        <Button size="lg" to="/claim" trailingIcon={ArrowRight}>
+          Claim your entity
+        </Button>
       </div>
     </Section>
   );

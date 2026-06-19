@@ -48,7 +48,7 @@ type MonoLabelProps = {
 
 export function MonoLabel({ as: Tag = "p", className, children }: MonoLabelProps) {
   return (
-    <Tag className={cn("text-mono-label font-mono uppercase text-slate-500", className)}>
+    <Tag className={cn("text-mono-label font-mono uppercase tabular-nums text-slate-500", className)}>
       {children}
     </Tag>
   );

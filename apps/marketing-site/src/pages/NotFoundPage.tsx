@@ -20,7 +20,7 @@ export default function NotFoundPage() {
             Home
           </Button>
           <Button to="/claim" variant="secondary">
-            Claim Your Entity
+            Claim your entity
           </Button>
         </div>
       </Container>

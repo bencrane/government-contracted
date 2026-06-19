@@ -14,7 +14,7 @@ export function Field({ name, label, hint, error, required, children }: FieldPro
     <div>
       <label
         htmlFor={name}
-        className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600"
+        className="block text-field-label uppercase text-slate-600"
       >
         {label}
         {required && <span className="ml-1 text-copper-600">*</span>}
@@ -31,7 +31,7 @@ export function Field({ name, label, hint, error, required, children }: FieldPro
 }
 
 const baseInput =
-  "w-full bg-white border border-line-strong px-4 py-3 text-[15px] text-navy-900 placeholder:text-slate-400 focus:outline-none focus:border-navy-500 focus:ring-2 focus:ring-navy-500/20 transition-all";
+  "w-full bg-white border border-line-strong px-4 py-3 text-body-sm text-navy-900 placeholder:text-slate-400 focus:outline-none focus:border-navy-500 focus:ring-2 focus:ring-navy-500/20 transition-all";
 
 export function TextInput({
   name,

@@ -14,12 +14,13 @@ const heading = cva("font-display text-balance", {
       h1: "text-h1",
       h2: "text-h2",
       h3: "text-h3",
+      h4: "text-h4",
     },
   },
   defaultVariants: { role: "h2" },
 });
 
-type Level = 1 | 2 | 3;
+type Level = 1 | 2 | 3 | 4;
 
 type HeadingProps = {
   level?: Level;
@@ -31,11 +32,12 @@ type HeadingProps = {
   children: ReactNode;
 };
 
-const LEVEL_TAG: Record<Level, ElementType> = { 1: "h1", 2: "h2", 3: "h3" };
+const LEVEL_TAG: Record<Level, ElementType> = { 1: "h1", 2: "h2", 3: "h3", 4: "h4" };
 const LEVEL_ROLE: Record<Level, NonNullable<VariantProps<typeof heading>["role"]>> = {
   1: "h1",
   2: "h2",
   3: "h3",
+  4: "h4",
 };
 
 export function Heading({

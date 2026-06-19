@@ -48,7 +48,7 @@ export function Tabs({
               type="button"
               aria-selected={isActive}
               onClick={() => setActive(t.id)}
-              className="relative px-3 py-3 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] outline-none focus-visible:text-navy-900"
+              className="relative px-3 py-3 text-mono-label font-semibold uppercase outline-none focus-visible:text-navy-900"
             >
               <span
                 className={

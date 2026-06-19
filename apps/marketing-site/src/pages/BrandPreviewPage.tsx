@@ -236,7 +236,6 @@ export default function BrandPreviewPage() {
             </>
           }
           lede="Live SAM.gov profile, every federal contract action since FY08 — pegged to your UEI."
-          footnote="Free for registered contractors · sourced from SAM.gov + USAspending.gov."
           media={<GoldenProfilePreview />}
           ratio="6/6"
         />

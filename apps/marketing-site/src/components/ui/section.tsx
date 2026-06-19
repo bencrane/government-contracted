@@ -13,7 +13,7 @@ const section = cva("relative", {
     tone: {
       cream: "bg-background text-foreground",
       navy: "bg-navy-900 text-slate-100",
-      slate: "bg-slate-100 text-foreground",
+      slate: "bg-slate-200 text-foreground",
     },
     spacing: {
       sm: "py-[var(--section-y-sm)]",

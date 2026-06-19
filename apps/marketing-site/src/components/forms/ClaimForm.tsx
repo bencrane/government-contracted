@@ -1,7 +1,7 @@
 import { type FormEvent, useState } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { submitClaim, type ClaimState } from "@/lib/submit";
-import { Button } from "@/components/ui";
+import { Button, Heading } from "@/components/ui";
 import { Field, TextArea, TextInput } from "./Field";
 
 const initial: ClaimState = { ok: false };
@@ -36,14 +36,14 @@ export default function ClaimForm({
     return (
       <div className="border border-copper-200 bg-copper-50 p-8 text-center">
         <CheckCircle2 className="mx-auto h-10 w-10 text-copper-600" />
-        <h3 className="font-display mt-5 text-2xl text-navy-900">
+        <Heading level={3} className="mt-5 text-navy-900">
           Entity claimed.
-        </h3>
+        </Heading>
         <p className="mt-3 text-sm leading-relaxed text-slate-700">
           {state.message}
         </p>
         {state.uei && (
-          <p className="mt-4 text-[11px] uppercase tracking-[0.14em] text-slate-500 font-mono">
+          <p className="mt-4 text-field-label uppercase text-slate-500 font-mono">
             UEI {state.uei}
           </p>
         )}
@@ -134,7 +134,7 @@ export default function ClaimForm({
         </>
       )}
 
-      <div className="flex justify-center border-t border-line pt-5">
+      <div className="flex justify-end border-t border-line pt-5">
         <SubmitButton pending={pending} />
       </div>
     </form>
@@ -150,7 +150,7 @@ function SubmitButton({ pending }: { pending: boolean }) {
           Claiming
         </>
       ) : (
-        "Claim Entity"
+        "Claim your entity"
       )}
     </Button>
   );

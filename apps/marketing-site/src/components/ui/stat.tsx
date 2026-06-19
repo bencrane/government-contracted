@@ -6,7 +6,7 @@ import { MonoLabel } from "./eyebrow";
 /** The KPI / fact block — label + value (+ optional sub, accent, leading icon).
  *  Subsumes the local `Kpi` (size="kpi") and `Fact` (size="fact") that were
  *  trapped in GoldenProfilePreview, so EntityFinder and others share one source. */
-const value = cva("leading-none", {
+const value = cva("leading-none tabular-nums", {
   variants: {
     size: {
       kpi: "font-display text-2xl",
@@ -45,7 +45,7 @@ export function Stat({
         {label}
       </MonoLabel>
       <p className={cn("mt-1", value({ size, accent }))}>{val}</p>
-      {sub && <p className="mt-1 truncate text-[0.6875rem] text-slate-500">{sub}</p>}
+      {sub && <p className="mt-1 truncate text-caption tabular-nums text-slate-500">{sub}</p>}
     </div>
   );
 }
