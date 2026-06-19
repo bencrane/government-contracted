@@ -27,10 +27,7 @@ export default function NextDeadlines({
   return (
     <div>
       <div className="mb-4 flex items-end justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="font-display text-2xl text-navy-900">Next deadlines</h2>
-          {flagMock && <MockBadge />}
-        </div>
+        <h2 className="font-display text-2xl text-navy-900">Next deadlines</h2>
         <Link
           href={href}
           className="group inline-flex items-center gap-1.5 text-sm font-medium text-navy-700 transition-colors hover:text-navy-800"
@@ -40,20 +37,26 @@ export default function NextDeadlines({
         </Link>
       </div>
       <ul className="divide-y divide-line border border-line bg-surface">
-        {deadlines.map((d) => (
-          <li key={d.id} className="flex items-center justify-between px-5 py-4">
-            <div className="flex items-center gap-3">
-              <span className={statusTint[d.status]}>{statusIcon[d.status]}</span>
-              <div>
-                <p className={`text-sm font-semibold ${flagMock ? "text-red-600" : "text-navy-900"}`}>{d.label}</p>
-                <p className={`text-xs ${flagMock ? "text-red-500" : "text-slate-500"}`}>
-                  {d.type} · due {d.dueDate}
-                </p>
+        {deadlines.map((d) => {
+          const mock = d.isMock ?? flagMock;
+          return (
+            <li key={d.id} className="flex items-center justify-between px-5 py-4">
+              <div className="flex items-center gap-3">
+                <span className={statusTint[d.status]}>{statusIcon[d.status]}</span>
+                <div>
+                  <p className={`text-sm font-semibold ${mock ? "text-red-600" : "text-navy-900"}`}>
+                    {d.label}
+                    {mock && <MockBadge className="ml-2 align-middle" />}
+                  </p>
+                  <p className={`text-xs ${mock ? "text-red-500" : "text-slate-500"}`}>
+                    {d.type} · due {d.dueDate}
+                  </p>
+                </div>
               </div>
-            </div>
-            <p className="font-mono text-xs text-slate-500">{d.daysToDue}d</p>
-          </li>
-        ))}
+              <p className="font-mono text-xs text-slate-500">{d.daysToDue}d</p>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

@@ -5,11 +5,16 @@ import HealthRow from "@/components/dashboard/HealthRow";
 import EventFeed from "@/components/dashboard/EventFeed";
 import NextDeadlines from "@/components/dashboard/NextDeadlines";
 import ActionShortcuts from "@/components/dashboard/ActionShortcuts";
-import MockBadge from "@/components/dashboard/MockBadge";
 import { getMockDashboard } from "@/lib/mock-dashboard";
 import { resolveTenantUei } from "@/lib/tenant";
 import { getOverview, getSamProfile } from "@/lib/catalyst/client";
-import { hydrateContractor, hydrateSam } from "@/lib/dashboard-adapter";
+import {
+  hydrateContractor,
+  hydrateSam,
+  renewalCheck,
+  renewalDeadline,
+  renewalFeedEvent,
+} from "@/lib/dashboard-adapter";
 import { SHOW_MOCK_MARKERS } from "@/lib/flags";
 
 type Props = {
@@ -38,7 +43,24 @@ export default async function DashboardPage({ params }: Props) {
   const contractor = hydrateContractor(base.contractor, cleanUei, overview, sam);
   const samTile = hydrateSam(base.sam, sam);
   const activeContractsCount = overview?.activeContractCount ?? base.activeContracts.count;
-  const recentFeed = base.feed.slice(0, 4);
+
+  // SAM-renewal cluster: derive the renewal tile, deadline, and feed item from the
+  // live SAM expiration. Each builder returns null when that datum is absent, in
+  // which case the mock placeholder stays in place (and stays flagged).
+  const renewal = renewalCheck(sam);
+  const worstCompliance = renewal ?? base.worstCompliance;
+  const complianceMock = SHOW_MOCK_MARKERS && renewal == null;
+
+  const renewalDl = renewalDeadline(sam);
+  const deadlines = renewalDl
+    ? base.deadlines.map((d) => (d.type === "SAM Renewal" ? renewalDl : d))
+    : base.deadlines;
+
+  const renewalEvent = renewalFeedEvent(sam, cleanUei);
+  const feed = renewalEvent
+    ? base.feed.map((e) => (e.category === "compliance" ? renewalEvent : e))
+    : base.feed;
+  const recentFeed = feed.slice(0, 4);
 
   return (
     <>
@@ -46,25 +68,23 @@ export default async function DashboardPage({ params }: Props) {
       <HealthRow
         sam={samTile}
         surety={base.surety}
-        worstCompliance={base.worstCompliance}
+        worstCompliance={worstCompliance}
         activeContractsCount={activeContractsCount}
-        flagMock={SHOW_MOCK_MARKERS}
+        suretyMock={SHOW_MOCK_MARKERS}
+        complianceMock={complianceMock}
       />
 
       <section className="flex-1 bg-background">
         <div className="mx-auto max-w-[1400px] px-6 py-8 space-y-12">
           <NextDeadlines
-            deadlines={base.deadlines}
+            deadlines={deadlines}
             href={`/dashboard/${cleanUei}/compliance`}
             flagMock={SHOW_MOCK_MARKERS}
           />
 
           <div>
             <div className="mb-4 flex items-end justify-between">
-              <div className="flex items-center gap-2">
-                <h2 className="font-display text-2xl text-navy-900">What&apos;s new</h2>
-                {SHOW_MOCK_MARKERS && <MockBadge />}
-              </div>
+              <h2 className="font-display text-2xl text-navy-900">What&apos;s new</h2>
               <Link
                 href={`/dashboard/${cleanUei}/inbox`}
                 className="group inline-flex items-center gap-1.5 text-sm font-medium text-navy-700 transition-colors hover:text-navy-800"
