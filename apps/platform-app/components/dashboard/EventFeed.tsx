@@ -1,17 +1,23 @@
 import Link from "next/link";
 import type { FeedEvent } from "@/lib/mock-dashboard";
+import MockBadge from "@/components/dashboard/MockBadge";
 
 export default function EventFeed({
   events,
   hideHeader = false,
+  flagMock = false,
 }: {
   events: FeedEvent[];
   hideHeader?: boolean;
+  flagMock?: boolean;
 }) {
   return (
     <div>
       {!hideHeader && (
-        <h2 className="mb-4 font-display text-2xl text-navy-900">What&apos;s new</h2>
+        <div className="mb-4 flex items-center gap-2">
+          <h2 className="font-display text-2xl text-navy-900">What&apos;s new</h2>
+          {flagMock && <MockBadge />}
+        </div>
       )}
       <ul className="divide-y divide-line border border-line bg-surface">
         {events.map((e) => (
@@ -22,8 +28,8 @@ export default function EventFeed({
               </p>
               <p className="text-xs text-slate-500">{e.relativeTime}</p>
             </div>
-            <p className="mt-2 text-[15px] font-semibold text-navy-900">{e.title}</p>
-            <p className="mt-1 text-sm leading-relaxed text-slate-600">{e.body}</p>
+            <p className={`mt-2 text-[15px] font-semibold ${flagMock ? "text-red-600" : "text-navy-900"}`}>{e.title}</p>
+            <p className={`mt-1 text-sm leading-relaxed ${flagMock ? "text-red-500" : "text-slate-600"}`}>{e.body}</p>
             {e.primaryAction && (
               <Link
                 href={e.primaryAction.href}

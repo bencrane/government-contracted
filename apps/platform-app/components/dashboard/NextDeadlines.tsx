@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, AlertTriangle, CheckCircle2, AlertCircle } from "lucide-react";
 import type { Deadline, HealthStatus } from "@/lib/mock-dashboard";
+import MockBadge from "@/components/dashboard/MockBadge";
 
 const statusIcon: Record<HealthStatus, React.ReactNode> = {
   good: <CheckCircle2 className="h-3.5 w-3.5" />,
@@ -17,14 +18,19 @@ const statusTint: Record<HealthStatus, string> = {
 export default function NextDeadlines({
   deadlines,
   href,
+  flagMock = false,
 }: {
   deadlines: Deadline[];
   href: string;
+  flagMock?: boolean;
 }) {
   return (
     <div>
       <div className="mb-4 flex items-end justify-between">
-        <h2 className="font-display text-2xl text-navy-900">Next deadlines</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="font-display text-2xl text-navy-900">Next deadlines</h2>
+          {flagMock && <MockBadge />}
+        </div>
         <Link
           href={href}
           className="group inline-flex items-center gap-1.5 text-sm font-medium text-navy-700 transition-colors hover:text-navy-800"
@@ -39,8 +45,8 @@ export default function NextDeadlines({
             <div className="flex items-center gap-3">
               <span className={statusTint[d.status]}>{statusIcon[d.status]}</span>
               <div>
-                <p className="text-sm font-semibold text-navy-900">{d.label}</p>
-                <p className="text-xs text-slate-500">
+                <p className={`text-sm font-semibold ${flagMock ? "text-red-600" : "text-navy-900"}`}>{d.label}</p>
+                <p className={`text-xs ${flagMock ? "text-red-500" : "text-slate-500"}`}>
                   {d.type} · due {d.dueDate}
                 </p>
               </div>
