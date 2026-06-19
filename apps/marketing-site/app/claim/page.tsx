@@ -45,7 +45,7 @@ export default async function ClaimPage({
       <div className="relative mx-auto max-w-6xl px-6 pt-16 pb-24 md:pt-20">
         <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
               Claim Your Entity
             </p>
             <h1 className="font-display mt-4 text-5xl leading-[1.05] text-navy-900 text-balance">

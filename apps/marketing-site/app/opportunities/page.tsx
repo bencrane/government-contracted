@@ -13,7 +13,7 @@ export default function OpportunitiesPage() {
     <>
       <section className="seal-wash border-b border-line">
         <div className="mx-auto max-w-7xl px-6 pt-16 pb-12 md:pt-20">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
             Opportunities
           </p>
           <h1 className="font-display mt-4 text-5xl leading-[1.05] text-navy-900 text-balance md:text-6xl">
@@ -37,7 +37,7 @@ export default function OpportunitiesPage() {
         <div className="mx-auto max-w-7xl px-6 py-20 md:py-24">
           <div className="grid gap-10 md:grid-cols-12 md:items-center">
             <div className="md:col-span-8">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+              <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
                 Claim first
               </p>
               <h2 className="font-display mt-3 text-3xl leading-tight text-navy-900 md:text-4xl text-balance">

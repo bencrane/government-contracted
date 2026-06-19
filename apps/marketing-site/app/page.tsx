@@ -1,6 +1,4 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import EntityFinder from "@/components/marketing/EntityFinder";
+import GoldenProfilePreview from "@/components/marketing/GoldenProfilePreview";
 import CategoryGrid from "@/components/marketing/CategoryGrid";
 import Manifesto from "@/components/marketing/Manifesto";
 
@@ -14,7 +12,7 @@ export default function HomePage() {
         <div className="relative mx-auto max-w-7xl px-6 pt-16 pb-20 md:pt-24">
           <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+              <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
                 For registered federal contractors
               </p>
               <h1 className="font-display mt-5 text-5xl leading-[1.02] text-navy-900 text-balance md:text-[64px]">
@@ -27,61 +25,23 @@ export default function HomePage() {
                 FY08, and quotes on surety, capital, vendor programs,
                 equipment, and compliance — pegged to your UEI.
               </p>
-
-              <div className="mt-9">
-                <Link
-                  href="/claim"
-                  className="group inline-flex items-center justify-center gap-2 bg-navy-700 px-7 py-4 text-[15px] font-semibold text-white transition-colors hover:bg-navy-800"
-                >
-                  Claim Your Entity
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </div>
-
-              <p className="mt-8 text-xs text-slate-500">
-                30 seconds, UEI and email. Or skip ahead — type your name or
-                UEI in the live lookup and see your obligations now.
-              </p>
             </div>
 
             <div className="lg:col-span-6">
-              <EntityFinder />
+              <GoldenProfilePreview />
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* WHAT'S INSIDE */}
-      <section id="whats-inside" className="border-b border-line">
-        <div className="mx-auto max-w-7xl px-6 py-20 md:py-24">
-          <div className="mb-10 max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
-              What&apos;s inside
-            </p>
-            <h2 className="font-display mt-4 text-4xl leading-tight text-navy-900 md:text-5xl text-balance">
-              Solicitations to surety to capital — pegged to your UEI, in
-              one place.
-            </h2>
-            <p className="mt-5 text-lg leading-relaxed text-slate-700">
-              Each category matches against your live SAM.gov profile and
-              your awards history. The same UEI that unlocked your dashboard
-              is what brokers, lenders, and consultancies see when they
-              reach out.
-            </p>
-          </div>
-
-          <CategoryGrid />
         </div>
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="border-b border-line bg-slate-100">
+      <section className="border-b border-line bg-navy-900 text-slate-100">
         <div className="mx-auto max-w-7xl px-6 py-20 md:py-24">
           <div className="mb-14 max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-300">
               How it works
             </p>
-            <h2 className="font-display mt-4 text-4xl leading-tight text-navy-900 md:text-5xl text-balance">
+            <h2 className="font-display mt-4 text-4xl leading-tight text-white md:text-5xl text-balance">
               From UEI to a live dashboard in about thirty seconds.
             </h2>
           </div>
@@ -117,6 +77,29 @@ export default function HomePage() {
               </li>
             ))}
           </ol>
+        </div>
+      </section>
+
+      {/* WHAT'S INSIDE */}
+      <section id="whats-inside" className="border-b border-line">
+        <div className="mx-auto max-w-7xl px-6 py-20 md:py-24">
+          <div className="mb-10 max-w-3xl">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+              What&apos;s inside
+            </p>
+            <h2 className="font-display mt-4 text-4xl leading-tight text-navy-900 md:text-5xl text-balance">
+              Solicitations to surety to capital — pegged to your UEI, in
+              one place.
+            </h2>
+            <p className="mt-5 text-lg leading-relaxed text-slate-700">
+              Each category matches against your live SAM.gov profile and
+              your awards history. The same UEI that unlocked your dashboard
+              is what brokers, lenders, and consultancies see when they
+              reach out.
+            </p>
+          </div>
+
+          <CategoryGrid />
         </div>
       </section>
 

@@ -14,7 +14,7 @@ export default function AboutPage() {
         <div aria-hidden className="absolute inset-0 paper-grid opacity-40" />
 
         <div className="relative mx-auto max-w-6xl px-6 pt-12 pb-12 md:pt-16 md:pb-16">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
             About
           </p>
           <h1 className="font-display mt-3 text-4xl leading-[1.05] text-navy-900 text-balance md:text-5xl">
@@ -61,7 +61,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
           <div className="grid gap-10 md:grid-cols-12 md:gap-14">
             <div className="md:col-span-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+              <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
                 The model
               </p>
               <h2 className="font-display mt-3 text-3xl leading-tight text-navy-900 md:text-4xl text-balance">
@@ -121,7 +121,7 @@ export default function AboutPage() {
 function Pillar({ eyebrow, body }: { eyebrow: string; body: string }) {
   return (
     <div className="bg-surface p-7 md:p-8">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+      <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
         {eyebrow}
       </p>
       <p className="mt-4 text-[15px] leading-relaxed text-slate-700">{body}</p>

@@ -25,7 +25,7 @@ export default function CategoryGrid({
               {variant === "hub" ? c.blurb : c.headline}
             </p>
             <span className="col-span-0 md:col-span-1 md:flex md:justify-end">
-              <ArrowUpRight className="hidden h-5 w-5 text-slate-300 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-copper-600 md:block" />
+              <ArrowUpRight className="hidden h-5 w-5 text-slate-300 group-hover:text-copper-600 md:block" />
             </span>
           </Link>
         </li>

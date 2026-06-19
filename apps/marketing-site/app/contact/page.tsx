@@ -11,7 +11,7 @@ export default function ContactPage() {
       <div aria-hidden className="absolute inset-0 paper-grid opacity-30" />
 
       <div className="relative mx-auto max-w-3xl px-6 pt-16 pb-24 md:pt-20">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-600">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-copper-600">
           Contact
         </p>
         <h1 className="font-display mt-3 text-5xl leading-[1.05] text-navy-900 text-balance md:text-6xl">
