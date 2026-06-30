@@ -34,62 +34,35 @@ const STEPS = [
   },
 ];
 
-const [LEAD_STEP, ...SUPPORT_STEPS] = STEPS;
-
 function StepCard({
   step,
   title,
   body,
-  lead = false,
   as = "li",
 }: {
   step: string;
   title: string;
   body: string;
-  lead?: boolean;
   as?: ElementType;
 }) {
   return (
     <Card as={as} surface="white" padding="none" className="border-0 p-7 md:p-8">
       {/* Body is pinned to slate-600 — NOT the navy band's muted ramp
           (text-slate-300, invisible on these white cards). */}
-      {lead ? (
-        // Lead step: a width-filling editorial row — numeral + title on the
-        // left, body on the right — so the full-bleed lead card has no dead gap.
-        <div className="grid gap-x-12 gap-y-4 md:grid-cols-2 md:items-baseline">
-          <div className="flex items-baseline gap-6">
-            <MonoLabel
-              as="span"
-              className="font-display text-h3 not-italic tracking-tight text-copper-600"
-            >
-              {step}
-            </MonoLabel>
-            <Heading level={3} className="text-navy-900">
-              {title}
-            </Heading>
-          </div>
-          <Text size="body-sm" className="text-slate-600">
-            {body}
-          </Text>
-        </div>
-      ) : (
-        <>
-          <MonoLabel
-            as="p"
-            className="font-display text-h3 not-italic tracking-tight text-copper-600"
-          >
-            {step}
-          </MonoLabel>
-          <div className="mt-5">
-            <Heading level={3} className="text-navy-900">
-              {title}
-            </Heading>
-            <Text size="body-sm" className="mt-3 text-slate-600">
-              {body}
-            </Text>
-          </div>
-        </>
-      )}
+      <MonoLabel
+        as="p"
+        className="font-display text-h3 not-italic tracking-tight text-copper-600"
+      >
+        {step}
+      </MonoLabel>
+      <div className="mt-5">
+        <Heading level={3} className="text-navy-900">
+          {title}
+        </Heading>
+        <Text size="body-sm" className="mt-3 text-slate-600">
+          {body}
+        </Text>
+      </div>
     </Card>
   );
 }
@@ -147,18 +120,11 @@ export default function HomePage() {
           heading="From UEI to a live dashboard in about thirty seconds."
         />
 
-        <ol className="flex flex-col gap-px border border-line bg-line">
-          {/* Lead step (01) carries more weight — full-width row, numeral and copy
-              run inline so it reads as the entry point, not one of three equal cells. */}
-          <StepCard {...LEAD_STEP} lead />
-          <li>
-            <Grid cols={2} gap="px" align="stretch" className="bg-line">
-              {SUPPORT_STEPS.map((s) => (
-                <StepCard key={s.step} {...s} as="div" />
-              ))}
-            </Grid>
-          </li>
-        </ol>
+        <Grid cols={3} gap="px" as="ol" align="stretch" className="border border-line bg-line">
+          {STEPS.map((s) => (
+            <StepCard key={s.step} {...s} />
+          ))}
+        </Grid>
       </Section>
 
       {/* WHAT'S INSIDE — cream band; tighter teaser, not equal-weight to How it works */}

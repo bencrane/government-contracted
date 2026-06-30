@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
-import CategoryGrid from "@/components/marketing/CategoryGrid";
 import { CtaClose } from "@/components/marketing/CtaClose";
 import { CATEGORIES, federalStats } from "@/lib/opportunities";
 import { usePageTitle } from "@/lib/usePageTitle";
@@ -15,8 +14,6 @@ import {
   Text,
   MonoLabel,
 } from "@/components/ui";
-
-const FEATURED = CATEGORIES.slice(0, 2);
 
 export default function OpportunitiesPage() {
   usePageTitle("Opportunities — Government Contracted");
@@ -91,14 +88,16 @@ export default function OpportunitiesPage() {
         <div className="mb-12 max-w-2xl">
           <Heading level={2}>The six categories, in detail.</Heading>
           <Text size="body-lg" tone="muted" className="mt-6 max-w-2xl">
-            Every category matches against your live entity profile. The two that
-            move the most money lead; the rest run as a compact ledger below.
+            Every category matches against your live entity profile — your NAICS,
+            set-aside, bonding capacity, and the agencies you've already worked
+            with. Each one shows up in your dashboard when it fits.
           </Text>
         </div>
 
-        {/* Featured top row — the two highest-value categories */}
-        <Grid cols={2} gap="px" as="ol" className="mb-12 border border-line bg-line">
-          {FEATURED.map((c, i) => (
+        {/* One uniform card per category — every category gets the same
+            treatment; no featured/demoted split. */}
+        <Grid cols={2} gap="px" as="ol" align="stretch" className="border border-line bg-line">
+          {CATEGORIES.map((c, i) => (
             <Card
               as="li"
               key={c.slug}
@@ -108,7 +107,7 @@ export default function OpportunitiesPage() {
             >
               <Link
                 to={`/opportunities/${c.slug}`}
-                className="group block h-full p-7 transition-colors hover:bg-navy-50/30 md:p-8"
+                className="group flex h-full flex-col p-7 transition-colors hover:bg-navy-50/30 md:p-8"
               >
                 <div className="flex items-baseline justify-between gap-4">
                   <MonoLabel as="span" className="text-copper-600">
@@ -139,10 +138,6 @@ export default function OpportunitiesPage() {
             </Card>
           ))}
         </Grid>
-
-        {/* Demoted rest — compact hairline ledger; the two featured above are
-            skipped so categories render once, numbered continuously 03–06. */}
-        <CategoryGrid variant="hub" start={2} />
       </Section>
 
       {/* CLAIM FIRST — slate close */}
