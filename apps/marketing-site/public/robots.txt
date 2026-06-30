@@ -1,0 +1,6 @@
+# /brand-preview is the internal design-system kitchen-sink spec — keep it out
+# of search indexes. The page also injects a noindex meta at runtime (see
+# useNoindex) for crawlers that ignore robots and render JS.
+User-agent: *
+Allow: /
+Disallow: /brand-preview

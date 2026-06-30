@@ -4,6 +4,7 @@
 
 import { ArrowRight, ArrowUpRight, CalendarClock, Landmark } from "lucide-react";
 import { usePageTitle } from "@/lib/usePageTitle";
+import { useNoindex } from "@/lib/useNoindex";
 import GoldenProfilePreview from "@/components/marketing/GoldenProfilePreview";
 import {
   Section,
@@ -24,6 +25,7 @@ import {
 
 export default function BrandPreviewPage() {
   usePageTitle("Kitchen sink — Government Contracted");
+  useNoindex();
 
   return (
     <>
