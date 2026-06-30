@@ -54,7 +54,7 @@ export function Tabs({
                 className={
                   isActive
                     ? "text-navy-900"
-                    : "text-slate-400 transition-colors hover:text-slate-600"
+                    : "text-slate-500 transition-colors hover:text-slate-700"
                 }
               >
                 {t.label}
