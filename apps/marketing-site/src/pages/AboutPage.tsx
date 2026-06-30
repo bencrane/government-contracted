@@ -12,7 +12,7 @@ import {
   SectionHeader,
 } from "@/components/ui";
 
-const [LEAD_PILLAR, ...SUPPORT_PILLARS] = [
+const PILLARS = [
   {
     index: "01",
     eyebrow: "Federal data, daily",
@@ -79,17 +79,13 @@ export default function AboutPage() {
         </Container>
       </Section>
 
-      {/* THREE PILLARS — cream band, hairline grid; broken symmetry mirrors Home's
-          "How it works": pillar 01 leads full-width, 02/03 split 2-up below. */}
+      {/* THREE PILLARS — cream band, hairline grid; three equal cells. */}
       <Section tone="cream" spacing="lg" divide>
-        <div className="flex flex-col gap-px border border-line bg-line">
-          <Pillar {...LEAD_PILLAR} lead />
-          <Grid cols={2} gap="px" align="stretch" className="bg-line">
-            {SUPPORT_PILLARS.map((p) => (
-              <Pillar key={p.index} {...p} />
-            ))}
-          </Grid>
-        </div>
+        <Grid cols={3} gap="px" as="ol" align="stretch" className="border border-line bg-line">
+          {PILLARS.map((p) => (
+            <Pillar key={p.index} {...p} />
+          ))}
+        </Grid>
       </Section>
 
       {/* THE MODEL — slate band */}
@@ -134,38 +130,26 @@ function Pillar({
   eyebrow,
   title,
   body,
-  lead = false,
 }: {
   index: string;
   eyebrow: string;
   title: string;
   body: string;
-  lead?: boolean;
 }) {
   return (
-    <Card surface="white" padding="sm" className="border-0 md:p-8">
-      <div
-        className={
-          lead
-            ? "flex flex-col gap-6 md:flex-row md:items-baseline md:gap-10"
-            : undefined
-        }
-      >
-        <div className="flex items-baseline gap-3">
-          <MonoLabel as="span" className="text-copper-600">
-            {index}
-          </MonoLabel>
-          <Eyebrow as="span">{eyebrow}</Eyebrow>
-        </div>
-        <div className={lead ? "md:max-w-2xl" : undefined}>
-          <Heading level={3} className={lead ? undefined : "mt-5"}>
-            {title}
-          </Heading>
-          <Text size="body-sm" tone="muted" className="mt-3">
-            {body}
-          </Text>
-        </div>
+    <Card as="li" surface="white" padding="sm" className="border-0 md:p-8">
+      <div className="flex items-baseline gap-3">
+        <MonoLabel as="span" className="text-copper-600">
+          {index}
+        </MonoLabel>
+        <Eyebrow as="span">{eyebrow}</Eyebrow>
       </div>
+      <Heading level={3} className="mt-5">
+        {title}
+      </Heading>
+      <Text size="body-sm" tone="muted" className="mt-3">
+        {body}
+      </Text>
     </Card>
   );
 }
