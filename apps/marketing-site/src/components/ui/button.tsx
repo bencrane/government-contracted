@@ -8,18 +8,26 @@ import {
 import { Link } from "react-router-dom";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
+import { useSectionTone } from "./section-context";
 
 /** The single CTA source of truth — replaces 11 inline reimplementations across
  *  5 divergent paddings. Sharp corners; navy-filled primary, hairline secondary,
  *  text-link ghost. Renders <button>, a react-router <Link> (pass `to`), an <a>
  *  (pass `href`), or wraps an arbitrary child (`asChild`). The trailing arrow is
- *  ALWAYS static — there is no animateIcon prop, by design. */
+ *  ALWAYS static — there is no animateIcon prop, by design.
+ *
+ *  Primary recolors from the ambient Section tone: on a navy band the navy fill
+ *  collapses to ~1.4:1 against the band, so it flips to `primaryInverse` (a warm
+ *  ivory fill) — the closing CTA then reads as the band's heaviest element, the
+ *  way CtaClose intends. Same context-driven recolor the Eyebrow primitive uses;
+ *  `primaryInverse` is internal and resolved automatically (not for direct use). */
 const button = cva(
   "group inline-flex items-center justify-center gap-2 font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-navy-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
         primary: "bg-navy-700 text-white hover:bg-navy-800",
+        primaryInverse: "bg-copper-50 text-navy-900 hover:bg-white",
         secondary:
           "border border-line-strong bg-transparent text-navy-800 hover:border-copper-500 hover:text-copper-700",
         ghost:
@@ -72,7 +80,15 @@ export function Button(props: ButtonProps) {
     ...rest
   } = props;
 
-  const classes = cn(button({ variant, size, fullWidth }), className);
+  // Primary buttons recolor from the band they sit in: on navy, the navy fill
+  // would render at ~1.4:1 against the section, so flip to the ivory inverse.
+  // Other variants and other bands are unchanged.
+  const band = useSectionTone();
+  const resolvedVariant =
+    (variant ?? "primary") === "primary" && band === "navy"
+      ? "primaryInverse"
+      : variant;
+  const classes = cn(button({ variant: resolvedVariant, size, fullWidth }), className);
   const inner = (
     <>
       {children}
