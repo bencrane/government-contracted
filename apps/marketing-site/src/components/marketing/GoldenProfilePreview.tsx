@@ -118,7 +118,7 @@ function AgenciesPanel() {
                 <span className="font-mono text-xs tabular-nums text-slate-500">
                   {usd(a.amount)}
                 </span>
-                <span className="w-9 text-right font-mono text-mono-label tabular-nums text-slate-400">
+                <span className="w-9 text-right font-mono text-mono-label tabular-nums text-slate-500">
                   {share.toFixed(0)}%
                 </span>
               </div>

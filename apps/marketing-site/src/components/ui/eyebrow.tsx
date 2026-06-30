@@ -4,8 +4,9 @@ import { useSectionTone } from "./section-context";
 
 /** The copper kicker — one component for the label that was copy-pasted 16×.
  *  `text-eyebrow` carries size/tracking/weight; `uppercase` + family are applied
- *  here. Color resolves from the Section band (copper-600 on light, copper-300 on
- *  navy) unless `tone` overrides it. */
+ *  here. Color resolves from the Section band (copper-600 on cream, copper-700 on
+ *  the lighter slate band so it clears AA, copper-300 on navy) unless `tone`
+ *  overrides it. */
 type EyebrowTone = "auto" | "copper" | "copper-light";
 
 type EyebrowProps = {
@@ -29,7 +30,9 @@ export function Eyebrow({
         ? "text-copper-300"
         : band === "navy"
           ? "text-copper-300"
-          : "text-copper-600";
+          : band === "slate"
+            ? "text-copper-700"
+            : "text-copper-600";
   return (
     <Tag className={cn("text-eyebrow font-sans uppercase", resolved, className)}>
       {children}

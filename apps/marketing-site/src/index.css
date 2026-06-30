@@ -163,8 +163,12 @@
     border-color: var(--color-line, currentColor);
   }
 
-  html {
-    scroll-behavior: smooth;
+  /* Smooth anchor scrolling, but only for users who haven't asked for less
+     motion — otherwise every in-page jump animates against their preference. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 
   body {
